@@ -18,10 +18,6 @@ class Connection {
     private $user_id_db;
     public $isConnected = false;
 
-    function __construct() {
-        
-    }
-
     /*
      * La fonction checkBdd permet d'aller vérifier en base de données si le nom d'utilisateur transmis existe bel et bien.
      * Cette fonction récupère aussi toute la ligne présente en base de données (id,user,password,last_login,level_access)
@@ -32,20 +28,11 @@ class Connection {
         $this->user = $user;
         $this->psswd = $psswd;
         $this->time = $time;
-        $this->checkBdd();
-        if ($this->checkPassword()) {
-            $this->userConnected();
-            $this->isConnected = true;
-        } else {
-            echo "La connexion &agrave; &eacute;chou&eacute;e veuillez v&eacute;rifier vos informations de connexion";
-        }
         try {
             // Début de la connexion à la BDD avec PDO
-            include_once('config.php');
+            require_once(__DIR__ . '/config.php');
             $this->db = connectPdo();
-
             $sql = "SELECT * FROM user WHERE user = '" . $this->user . "'";
-
             $result = $this->db->query($sql);
             $result->setFetchMode(PDO::FETCH_ASSOC);
             $row = $result->fetch();
@@ -56,14 +43,21 @@ class Connection {
         } catch (PDOException $e) {
             print $e->getMessage() . "</br>";
         }
+        if ($this->checkPassword()) {
+            $this->userConnected();
+            $this->isConnected = true;
+        } else {
+            echo "La connexion &agrave; &eacute;chou&eacute;e veuillez v&eacute;rifier vos informations de connexion";
+        }
     }
 
     // La fonction checkPassword() vérifie que le mot de passe entré est bien correct.
     private function checkPassword() {
-        if ($this->password_db === crypt($this->psswd, "js"))
+        if ($this->password_db === crypt($this->psswd, "js")) {
             return TRUE;
-        else
+        } else {
             return FALSE;
+        }
     }
 
     // Vérifie que l'utilisateur est bien connecté
@@ -77,39 +71,39 @@ class Connection {
         $this->db->exec($sql);
     }
 
-    public function addUser($username, $password, $level_access, $fullname) {
+    public function addUser($username, $password, $level_access, $email) {
         $requete = $this->db->prepare('INSERT INTO user
-(username, password, level_access, fullname) 
-VALUES (:username, :password, :level_access, :fullname )');
+(username, password, level_access, email) 
+VALUES (:username, :password, :level_access, :email )');
 
         // Chiffrement du mot de passe avec crypt
         if (!$requete->execute(array('username' => strtolower($username),
                     'password' => crypt($password, "js"),
                     'level_access' => $level_access,
-                    'fullname' => $fullname)))
+                    'email' => $email))) {
             return FALSE;
-        else {
+        } else {
             return true;
         }
     }
 
-    public function modifyUser($username, $id, $fullname, $password = null) {
+    public function modifyUser($username, $id, $email, $password = null) {
         try {
             // Si le mot de passe a été changé
             if ($password != null)
                 $requete = $this->db->prepare('UPDATE user SET
-username = :username, fullname = :fullname, password = :password WHERE iduser = :id');
+username = :username, email = :email, password = :password WHERE iduser = :id');
             if (!$requete->execute(array('username' => $username, 'password' => crypt($password, "js"),
-                        'fullname' => $fullname,
+                        'email' => $email,
                         'id' => $id))) {
                 $message = $requete->errorInfo();
                 print_r($message);
                 throw new PDOException();
             } else {
                 $requete = $this->db->prepare('UPDATE user SET
-username = :username fullname = :fullname, WHERE iduser = :id');
+username = :username email = :email, WHERE iduser = :id');
                 if (!$requete->execute(array('username' => $username,
-                            'fullname' => $fullname,
+                            'email' => $email,
                             'id' => $id))) {
                     $message = $requete->errorInfo();
                     print_r($message);
@@ -126,19 +120,17 @@ username = :username fullname = :fullname, WHERE iduser = :id');
         $requete = $this->db->prepare('DELETE FROM user
 WHERE iduser = :id');
 
-        if (!$requete->execute(array('id' => $id)))
+        if (!$requete->execute(array('id' => $id))) {
             return FALSE;
-        else {
+        } else {
             return true;
         }
     }
 
     public function getListUsers() {
-        include_once('config.php');
+        require_once(__DIR__ . '/config.php');
         $this->db = connectPdo();
-
         $sql = "SELECT * FROM user";
-
         $result = $this->db->query($sql);
         $result->setFetchMode(PDO::FETCH_ASSOC);
         $rows = $result->fetchAll();
@@ -146,12 +138,13 @@ WHERE iduser = :id');
     }
 
     public function getUser($id) {
-        include_once('config.php');
+        require_once(__DIR__ . '/config.php');
         $this->db = connectPdo();
 
-        $sql = "SELECT * FROM user WHERE iduser=";
+        $sql = "SELECT * FROM user WHERE iduser= :iduser";
 
-        $result = $this->db->query($sql);
+        $requete = $this->db->prepare($sql);
+        $result = $requete->execute(array('iduser' => $id));
         $result->setFetchMode(PDO::FETCH_ASSOC);
         $row = $result->fetch();
         return $row;
