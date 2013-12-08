@@ -30,7 +30,6 @@ function verifyFormUserAdd(username, mail, password, password2)
         message += "Votre mot de passe doit comporter minimum 8 caractères.<br/>";
     else
     {
-        alert(password + " " + password2);
         if (password !== password2)
         {
             message += "Votre mot de passe et la confirmation ne correspondent pas.<br/>";
@@ -38,6 +37,7 @@ function verifyFormUserAdd(username, mail, password, password2)
     }
     return message;
 }
+
 
 function checkMailAdress(mail)
 {
