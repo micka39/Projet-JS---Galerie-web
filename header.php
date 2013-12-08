@@ -21,8 +21,9 @@
             $(document).ready(function() {
                 $("#connect").submit(function(event) {
                     event.preventDefault();
-                    var data = "username=" + $("usernameConnect").val() + "&password=" + $("passwordConnect").val();
-                    $("#buttonConnect").button('loading');
+                    var data = "username=" + $("#usernameConnect").val() + "&password=" + $("#passwordConnect").val();
+                    alert(data);
+                    //$("#buttonConnect").button('loading');
                     $.ajax({
                         type: "POST",
                         url: "ajax/users/connect.php",
@@ -59,11 +60,11 @@
                 <div class="navbar-collapse collapse">
                     <form class="navbar-form navbar-right" role="form" id="connect">
                         <div class="form-group">
-                            <input type="text" name="username" id="usernameConnect" class="form-control" placeholder="Nom d'utilisateur">
+                            <input type="text" name="usernameConnect" id="usernameConnect" class="form-control" placeholder="Nom d'utilisateur">
                         </div>
                         <div class="form-group">
 
-                            <input type="password" name="password" id="passwordConnect" class="form-control" placeholder="Mot de passe">
+                            <input type="password" name="passwordConnect" id="passwordConnect" class="form-control" placeholder="Mot de passe">
                         </div>
                         <button type="submit" class="btn btn-default" id="buttonConnect" data-loading-text="Connexion en cours ...">Connexion</button>>
                     </form>
