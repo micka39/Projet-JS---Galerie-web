@@ -1,6 +1,7 @@
 <?php
 $titre = "Gestion des utilisateurs";
 
+require_once '../bootstrap.php';
 require '../header.php';
 ?>
 <div class="jumbotron">

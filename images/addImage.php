@@ -6,53 +6,8 @@ require_once '../bootstrap.php';
  */
 
 // Vérification de l'existence du champs de formulaire fullname 
-if (isset($_POST['email'])) {
-    $connection = new Connection();
-    $message = "";
-    $username = filter_input(INPUT_POST, "username", FILTER_SANITIZE_SPECIAL_CHARS);
-    $password = "";
-    $email = "";
-    $level_access = "";
-    // Si l'utilisateur est valide on vérifie qu'il n'excède pas les 45 caractères
-    if ($username != (FALSE || NULL)) {
-        if (count($username) > 45 || count($username) == 0) {
-            $message .= "Le nom d'utilisateur ne doit pas être vide ni excéder"
-                    . " 45 caractères <br/>";
-        }
-        else
-        {
-            if(!$connection->checkAvailibity($username))
-            {
-                $message .= "Le nom d'utilisateur est déjà utilisé. <br/>";
-            }
-        }
-    } else {
-        $message .= "Le nom d'utilisateur ne peut excéder 45 caractères <br/>";
-    }
-    if ($_POST['password'] != $_POST['passwordConfirm'])
-        $message .= "Les mots de passes ne correspondent pas !<br/>";
-    else
-        $password = $_POST['password'];
-    if (isset($_SESSION['admin']))
-        if ($_POST['admin'] && $_SESSION['admin'])
-            $level_access = 0;
-        else
-            $level_access = 1;
-    if (!filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL))
-        $message . + "L'adresse email n'est pas valide  <br/>";
-    else
-        $email = $_POST['email'];
-    if ($message == "") {
-        if ($connection->addUser($username, $password, $level_access, $email))
-            echo 'Utilisateur ajouté avec succès !';
-        else {
-            $message .= "Il y a eu un problème durant l'ajout en base de données."
-                    . "Merci de réesayer.";
-            showForm($username, $_POST['email'], $message);
-        }
-    } else {
-        showForm($username, $_POST['email'], $message);
-    }
+if (isset($_FILES['email'])) {
+    var_dump($_FILES);
 } else {
     showForm();
 }
@@ -61,12 +16,15 @@ function showForm($username = "", $email = "", $message = "") {
 
     echo "<div class='alert alert-danger' id='infoFormValidation'>$message</div>";
     ?>
+<script src="js/vendor/jquery.ui.widget.js"></script>
+<script src="js/jquery.iframe-transport.js"></script>
+<script src="js/jquery.fileupload.js"></script>
 <div class="row">
     <form action="#" method="POST" class="form-horizontal" id="formAddUser">
         <p>Tous les champs sont obligatoires</p>
         <div class="form-group col-xs-12">
             <label for="email" class="control-label">Adresse courriel</label>
-            <input type="email" name="email" id="email" class="form-control" value="<?php echo $email; ?>"/>
+            <input type="file" multiple name="email" id="email" class="form-control" value="<?php echo $email; ?>"/>
         </div>
         <div class="form-group col-xs-12">
             <label for="username"  class="control-label" id="labelUsername">Nom d'utilisateur</label>
@@ -96,6 +54,18 @@ function showForm($username = "", $email = "", $message = "") {
 </div>
     <!-- Javascript pour le formulaire d'ajout d'utilisateur. -->
     <script type="text/javascript">
+        $(function () {
+    $('#email').fileupload({
+        url: 'images/addImage.php',
+        dataType: 'json',
+        done: function (e, data) {
+            $.each(data.result.files, function (index, file) {
+                $('<p/>').text(file.name).appendTo(document.body);
+            });
+        }
+    });
+});
+        
         $(document).ready(function() {
             $("#username").keyup(function()
             {

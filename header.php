@@ -22,15 +22,15 @@
                 $("#connect").submit(function(event) {
                     event.preventDefault();
                     var data = "username=" + $("#usernameConnect").val() + "&password=" + $("#passwordConnect").val();
-                    alert(data);
-                    //$("#buttonConnect").button('loading');
                     $.ajax({
                         type: "POST",
                         url: "ajax/users/connect.php",
                         data: data,
                         success: function(result) {
-                            if(result)
-                            $("#buttonConnect").text("fini !");
+                            if(result === "connect")
+                                $("#connection").html("<p class='navbar-text'>Vous êtes connecté en tant que "+ $("#usernameConnect").val() + " .</p>");
+                            else
+                                alert("Connexion impossible, veuillez vérifier vos informations");
                         },
                         error: function(xhr, type, thrownError) {
 
@@ -58,16 +58,33 @@
                     <a class="navbar-brand" href="#">Galerie web</a>
                 </div>
                 <div class="navbar-collapse collapse">
-                    <form class="navbar-form navbar-right" role="form" id="connect">
-                        <div class="form-group">
-                            <input type="text" name="usernameConnect" id="usernameConnect" class="form-control" placeholder="Nom d'utilisateur">
-                        </div>
-                        <div class="form-group">
 
-                            <input type="password" name="passwordConnect" id="passwordConnect" class="form-control" placeholder="Mot de passe">
-                        </div>
-                        <button type="submit" class="btn btn-default" id="buttonConnect" data-loading-text="Connexion en cours ...">Connexion</button>>
-                    </form>
+                    <div id="connection" class="navbar-right">
+                        <?php
+                        if(isset($_SESSION["connected"]))
+                        {
+                            echo "<p class='navbar-text'>Vous êtes connecté en tant que ".$_SESSION['name_user']. 
+                                    " . <a href='utilisateurs/deconnexion'>Deconnexion</a></p>";
+                            ?>
+                        
+                        <?php
+                        }
+                        else {
+                            ?>
+                        <form class="navbar-form navbar-right" role="form" id="connect">
+                            <div class="form-group">
+                                <input type="text" name="usernameConnect" id="usernameConnect" class="form-control" placeholder="Nom d'utilisateur">
+                            </div>
+                            <div class="form-group">
+
+                                <input type="password" name="passwordConnect" id="passwordConnect" class="form-control" placeholder="Mot de passe">
+                            </div>
+                            <button type="submit" class="btn btn-default" id="buttonConnect" data-loading-text="Connexion en cours ...">Connexion</button>>
+                        </form>
+                        <?php
+                        }
+                        ?>
+                    </div>
                 </div><!--/.navbar-collapse -->
             </div>
         </div>

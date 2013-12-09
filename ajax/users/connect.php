@@ -3,4 +3,7 @@
 require '../../bootstrap.php';
 
 $connection = new Connection();
-$connection->connect($_POST['username'], $_POST['password']);
+if($connection->connect($_POST['username'], $_POST['password']))
+        echo "connect";
+else
+    echo "error";

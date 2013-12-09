@@ -18,25 +18,27 @@ class Connection {
     private $user_id_db;
     public $isConnected = false;
 
+    public function __construct() {
+        // Début de la connexion à la BDD avec PDO
+        require_once(__DIR__ . '/config.php');
+        $this->db = connectPdo();
+    }
+
     /*
      * La fonction checkBdd permet d'aller vérifier en base de données si le nom d'utilisateur transmis existe bel et bien.
      * Cette fonction récupère aussi toute la ligne présente en base de données (id,user,password,last_login,level_access)
      * @return Rien si tout s'est bien passé OU une exception en cas de problème
      */
 
-    private function checkBdd($user, $psswd, $time) {
+    public function connect($user, $psswd) {
         $this->user = $user;
         $this->psswd = $psswd;
-        $this->time = $time;
         try {
-            // Début de la connexion à la BDD avec PDO
-            require_once(__DIR__ . '/config.php');
-            $this->db = connectPdo();
-            $sql = "SELECT * FROM user WHERE user = '" . $this->user . "'";
-            $result = $this->db->query($sql);
-            $result->setFetchMode(PDO::FETCH_ASSOC);
-            $row = $result->fetch();
-            $this->user_db = $row['user'];
+            $sql = "SELECT * FROM user WHERE username = :user";
+            $requete = $this->db->prepare($sql);
+            $requete->execute(array("user" => $this->user));
+            $row = $requete->fetch();
+            $this->user_db = $row['username'];
             $this->password_db = $row['password'];
             $this->access_level_db = $row['level_access'];
             $this->user_id_db = $row['iduser'];
@@ -46,14 +48,16 @@ class Connection {
         if ($this->checkPassword()) {
             $this->userConnected();
             $this->isConnected = true;
+            return TRUE;
         } else {
-            echo "La connexion &agrave; &eacute;chou&eacute;e veuillez v&eacute;rifier vos informations de connexion";
+            return false;
         }
+        return false;
     }
 
     // La fonction checkPassword() vérifie que le mot de passe entré est bien correct.
     private function checkPassword() {
-        if ($this->password_db === crypt($this->psswd, "js")) {
+        if ($this->password_db == crypt($this->psswd, "js")) {
             return TRUE;
         } else {
             return FALSE;
@@ -65,7 +69,10 @@ class Connection {
         $_SESSION['name_user'] = $this->user_db;
         $_SESSION['connected'] = $this->access_level_db;
         $_SESSION['user_id'] = $this->user_id_db;
-        echo "La connexion s'est deroulee avec succes, <a href='?page=accueil'>cliquez ici </a> pour revenir a la page d'accueil.";
+        if($this->access_level_db == 0)
+            $_SESSION['admin'] = true;
+        else
+            $_SESSION['admin'] = false;
         $time = time();
         $sql = "UPDATE user SET time = '" . $time . "' WHERE iduser= '" . $this->user_id_db . "'";
         $this->db->exec($sql);
@@ -83,7 +90,7 @@ VALUES (:username, :password, :level_access, :email )');
                     'email' => $email))) {
             return FALSE;
         } else {
-            return true;
+            return TRUE;
         }
     }
 
@@ -148,6 +155,21 @@ WHERE iduser = :id');
         $result->setFetchMode(PDO::FETCH_ASSOC);
         $row = $result->fetch();
         return $row;
+    }
+    /**
+     * Vérifie la disponibilité du nom d'utilisateur
+     * @param string $username
+     */
+    public function checkAvailibity($username) {
+        $sql = "SELECT count(*)as nb FROM user WHERE username = :name";
+
+        $requete = $this->db->prepare($sql);
+        
+        $requete->execute(array('name' => $username));
+        $row = $requete->fetch();
+        if($row['nb'] == 0)
+            return true;
+        return false;
     }
 
 }

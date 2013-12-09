@@ -1,4 +1,3 @@
-
 <?php 
 $titre = "Accueil de la galerie web";
 include_once("header.php"); ?>
