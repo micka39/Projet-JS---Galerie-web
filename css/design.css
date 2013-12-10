@@ -1,0 +1,17 @@
+/* 
+    Document   : design.css
+    Created on : 10 déc. 2013, 08:54:51
+    Author     : lp
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+root { 
+    display: block;
+}
+
+.droparea
+{
+    background-color: #999;
+    text-align: center;
+}

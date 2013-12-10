@@ -1,117 +1,108 @@
 <?php
+
 require_once '../bootstrap.php';
 /*
  * Gère la génération du formulaire d'ajout, la vérification serveur et l'ajout
  * en base de données d'un nouvel utilisateur
  */
-
 // Vérification de l'existence du champs de formulaire fullname 
-if (isset($_FILES['email'])) {
-    var_dump($_FILES);
+if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    $response = "";
+    $image = new Images();
+    if (!empty($_FILES)) {
+        $file = $_FILES['photos'];
+        // Vérification du type de fichier
+        switch ($file['type']) {
+            case "image/png":
+                $image->addImage($_POST['category'], $_FILES['photos']['name'], $_FILES['photos']['tmp_name']);
+                break;
+            case "image/jpeg":
+                $image->addImage($_POST['category'], $_FILES['photos']['name'], $_FILES['photos']['tmp_name']);
+                break;
+            default: {
+                    $response = array(
+                        "success" => "false",
+                        "message" => $_FILES['photos']['name'] . " - ce fichier n'est pas une image (png/jpeg) !",
+                        "code" => "1"
+                    );
+                }
+                break;
+        }
+        if($response == "")
+            $response = array(
+                        "success" => "true",
+                        "code" => "0"
+                    );
+    }
+    else {
+        $response = array(
+            "success" => "false",
+            "message" => "Aucun fichier",
+            "code" => "0"
+        );
+    }
+    echo json_encode($response);
 } else {
     showForm();
 }
 
-function showForm($username = "", $email = "", $message = "") {
+function showForm() {
+    ?>
+    <script src="js/vendor/jquery.ui.widget.js"></script>
+    <script src="js/jquery.iframe-transport.js"></script>
+    <script src="js/jquery.fileupload.js"></script>
+    <div class="row">
+        <form action="#" method="POST" class="form-horizontal" id="formAddUser">
+            <p>Attention les fichiers sont envoyés dés qu'ils sont glissés/déposés ou alors à la selection</p>
+            <div class="form-group col-xs-12">
+                <label for="category" class="control-label">Catégorie (vous pouvez en sélectionner plusieurs)</label>
+                <select name="category[]" id="category" class="form-control" multiple >
+                    <option value="1" selected>Non catégorisé</option>
+                    <option value="2">Divers</option>
+                    <option value="3">Nature</option>
+                </select>
+            </div>
 
-    echo "<div class='alert alert-danger' id='infoFormValidation'>$message</div>";
-    ?>
-<script src="js/vendor/jquery.ui.widget.js"></script>
-<script src="js/jquery.iframe-transport.js"></script>
-<script src="js/jquery.fileupload.js"></script>
-<div class="row">
-    <form action="#" method="POST" class="form-horizontal" id="formAddUser">
-        <p>Tous les champs sont obligatoires</p>
-        <div class="form-group col-xs-12">
-            <label for="email" class="control-label">Adresse courriel</label>
-            <input type="file" multiple name="email" id="email" class="form-control" value="<?php echo $email; ?>"/>
-        </div>
-        <div class="form-group col-xs-12">
-            <label for="username"  class="control-label" id="labelUsername">Nom d'utilisateur</label>
-            <input type="text" name="username" id="username" class="form-control" value="<?php echo $username; ?>"/>
-            
+            <p>Formats acceptés: JPG, PNG</p>
+            <div class="form-group col-xs-12">
+                <label for="photos" class="control-label">Image</label>
+                <input type="file" multiple name="photos" id="photos" class="form-control" />
+            </div>
+            <div class="droparea" id="droparea">
+                <p><img src="img/draganddrop.png" alt="Image représentant un glisser déposer"/> Glissez vos images ici</p>
+            </div>
+
+            <ul id="results"></ul>
+        </form>
     </div>
-    <div class="form-group col-xs-12">
-        <label for="password"  class="control-label">Mot de passe (8 caractères minimum)</label>
-        <input type="password" name="password" id="password" class="form-control"/>
-    </div>
-    <div class="form-group  col-xs-12">
-        <label for="passwordConfirm" class="control-label">Confirmation du mot de passe</label>
-        <input type="password" name="passwordConfirm" id="passwordConfirm" class="form-control"/>
-    </div>
-    <?php if ($_SESSION['admin']) {
-        ?>
-        <div class="form-group  col-xs-12">
-            <label for="admin" class="control-label">Administrateur</label>
-            <input type="checkbox" name="admin" id="admin" class="form-control"/>
-        </div>
-    <?php } 
-    ?>
-    <div class="form-group col-xs-3">
-        <input type="submit" value="Ajouter "/>
-    </div>
-    </form>
-</div>
     <!-- Javascript pour le formulaire d'ajout d'utilisateur. -->
     <script type="text/javascript">
+        var fileInUpload =0;
         $(function () {
-    $('#email').fileupload({
-        url: 'images/addImage.php',
-        dataType: 'json',
-        done: function (e, data) {
-            $.each(data.result.files, function (index, file) {
-                $('<p/>').text(file.name).appendTo(document.body);
-            });
-        }
-    });
-});
-        
-        $(document).ready(function() {
-            $("#username").keyup(function()
-            {
-                $.post("ajax/users/checkAvailability.php?username=" + $("#username").val(), function(data)
-                {
-                    if (data == "1")
-                        $("#labelUsername").text("Nom d'utilisateur (disponible)");
-                    else
-                        $("#labelUsername").text("Nom d'utilisateur (indisponible)");
-                });
-                    
-            });
-            if ($("#infoFormValidation").text() === "")
-                $("#infoFormValidation").hide();
-            $("#formAddUser").submit(function(event) {
-                // On bloque la soumission par défaut du formulaire
-                event.preventDefault();
-                var message = verifyFormUserAdd($("#username").val(), $("#email").val(), $("#password").val(), $("#passwordConfirm").val());
-                if (message !== "")
-                {
-                    $("#infoFormValidation").show(200);
-                    $("#infoFormValidation").html(message);
-                }
-                else
-                {
-                    $("#infoFormValidation").html("");
-                    var data = "username=" + $("#username").val() + "&email="
-                            + $("#email").val()
-                            + "&password=" + $("#password").val()
-                            + "&passwordConfirm=" + $("#passwordConfirm").val()
-                            + "&admin=" + $("#admin").val();
-                    $.ajax({
-                        type: "POST",
-                        url: "utilisateurs/addUser.php",
-                        data: data,
-                        dataType: "json",
-                        success: function(result) {
-                            $("#modalBody").html(result);
-                            $("#modal").modal('show');
-                        }
-
+            $('#photos').fileupload({
+                beforeSend: function(){
+                    fileInUpload ++;
+                },
+                url: 'images/addImage.php',
+                dataType: 'json',
+                done: function (e, data) {
+                    var json1 = data['result'];
+                    $.each(json1.photos, function(key, val) {
+                        alert(key + ' ' + val);
                     });
-                }
-            });
+                    fileInUpload --;
+                }});
+        });
+                            
+        $(document).ready(function() {
+            if(!('draggable' in document.createElement('span')))
+            {
+                $("#droparea").css(
+                "display",'none');
+            }
         });
     </script>
     <?php
+
 }
 ?>

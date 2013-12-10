@@ -36,7 +36,7 @@ require '../header.php';
 <script type="text/javascript">
     $(document).ready(function() {
         $("#addUser").click(function() {
-            showModal("Ajouter un utilisateur", "images/addImage.php");
+            showModal("Ajout d'image(s)", "images/addImage.php");
         });
 
         function showModal(title, url)

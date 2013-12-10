@@ -6,18 +6,11 @@ class Images {
     private $_image_com_tb_name = "images";
     private $_images_par_page = 20;
     private $_albums_par_page = 20;
-    private $_db;
+    private $db;
 
     public function __construct() {
-        include_once(dirname(__FILE__) . '/../config.php');
-        $logins = getLogins();
-        $this->_db = new PDO(getDSN(), $logins['user'], $logins['password']);
-    }
-
-    public function getComments($photo_id) {
-        $sql = "SELECT id, author, website, texte, mail, replyToComment FROM images_comment WHERE id_image = " . $photo_id;
-        $result = $this->_db->query($sql);
-        return $result;
+        require_once(__DIR__ . '/config.php');
+        $this->db = connectPdo();
     }
 
     public function getPhoto($photo_id) {
@@ -73,111 +66,53 @@ class Images {
         return $results;
     }
 
-    public function printFormAlbum($id = 0) {
-        if ($id != 0) {
-            $sql = "SELECT  nom, descri, visibilite, photo_defaut FROM albums WHERE id=" . $id;
-            $requete = $this->_db->query($sql);
-            $result = $requete->fetch();
-        } else {
-            $result['nom'] = "";
-            $result['descri'] = "";
-            $result['visibilite'] = 0;
-            $result['photo_defaut'] = 0;
-        }
-        ?>
-        <form action="../file_to_include/BackOffice/Images/ModifyAlbum.php?action=Save"  onsubmit="return false;" id="abc">
-            <label for="nom">Nom de l'album</label><input type="text" name="nom" id="nom" value="<? echo $result['nom']; ?>"/><br>
-            <label for="description">Descrition</label><textarea name="description" id="description" ><? echo $result['descri']; ?></textarea><br>
-            <label for="visibilite">Cet album doit-il être protege par mot de passe ?</label><select name="visibilite" id="visibilite">
-                <option value="0" selected="true">Non</option>
-                <option value="1">Oui</option>
-            </select><br/>
-            <label for="photo_defaut">Numéro de la photo d'illustration de l'album</label><input type="text" name="photo_defaut" id="photo_defaut" onmouseup="verifyImage(<? echo $id . ",this.value"; ?>);" onkeyup="verifyImage(<? echo $id . ",this.value"; ?>);" value="<? echo $result['photo_defaut']; ?>"/>
-            <br/><input type="hidden" name="id" value="<? echo $id ?>"/>
-            <input type="submit" onclick="Modalbox.show('../file_to_include/BackOffice/Images/ModifyAlbum.php?action=Save', {title: 'Album enregistré !', width: 460, height:150,params:Form.serialize('abc')}); return false;" value="Enregistrer l'album !"/>
-        </form>
-        <?php
-    }
-
-    public function delSpecCarac($chaine) {
-        return strtolower(strtr($chaine, 'ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðòóôõöùúûüýÿ0123456789', 'AAAAAACEEEEIIIIOOOOOUUUUYaaaaaaceeeeiiiioooooouuuuyy----------'));
-    }
-
-    public function addAlbum($texte, $description, $visibilite) {
-        $sql = "INSERT INTO albums (
-   id
-  ,nom
-  ,descri
-  ,visibilite
-  ,token
-) VALUES (
-   ''   -- id - IN int(11)
-  ,?  -- nom - IN varchar(50)
-  ,?  -- descri - IN text
-  ,?   -- visibilite - IN tinyint(2)
-  ,?  -- token - IN text
-)";
-        $token = uniqid();
-        $sql = $this->_db->prepare($sql);
-        $sql->execute(array($texte, $description, $visibilite, $token));
-        $path = dirname(__FILE__) . '/../../upload/' . $token . '/';
-        // On créé le répertoire destiné à recevoir les photos de l'album.
-        mkdir($path);
-        return $this->_db->lastInsertId();
-    }
-
-    public function addImage($id_album, $nom_fichier, $nom_fichier_temp, $path_image, $description, $titre, $album_defaut =null) {
-
-        $sql = "SELECT token, id, nom, nb_photos,photo_defaut FROM albums WHERE id = " . $id_album;
-        $result = $this->_db->query($sql);
-        $results = $result->fetch();
-
-        $path_album = $path_image . $results['token'] . '/';
-        $path_image_dest = $path_image . $results['token'] . '/' . $nom_fichier;
-        if (move_uploaded_file($nom_fichier_temp, $path_image_dest))
-            $retour[0] = "L'image a ete correctement transferee !";
-        else {
-            $retour[0] = "Erreur durant le transfert du fichier. Merci de reesayer. ";
-        }
+    public function addImage($id_categories, $nom_fichier, $nom_fichier_temp) {
+        $token_file_name = uniqid();
+        $path_album = __DIR__ . '../../upload/';
+        $path_image_dest = $path_album . $token_file_name;
+//        if (move_uploaded_file($nom_fichier_temp, $path_image_dest))
+//            $retour[0] = "L'image a ete correctement transferee !";
+//        else {
+//            $retour[0] = "Erreur durant le transfert du fichier. Merci de reesayer. ";
+//        }
         $tab = explode(".", $nom_fichier);
-        echo "<pre>";
-        print_r($tab);
-        echo "</pre>";
-        $this->imagethumb($path_image_dest, $path_album . $tab['0'] . "_s." . $tab['1'], 200);
-        $this->imagethumb($path_image_dest, $path_album . $tab['0'] . "_m." . $tab['1'], 640);
-        $sql = "INSERT INTO images (
-               id
-              ,nom
-              ,descri
-              ,id_album
-              ,visibilite
-              ,nom_fichier
-              ,nom_fichier_th
-              ,nom_fichier_m
+        
+        $this->imagethumb($nom_fichier_temp, $path_album . $token_file_name . "_s." . $tab['1'], 200);
+        $this->imagethumb($nom_fichier_temp, $path_album . $token_file_name . "_m." . $tab['1'], 1024);
+        $this->imagethumb($nom_fichier_temp, $path_album . $token_file_name . "_l." . $tab['1'], 2048);
+        $sql = "INSERT INTO image (
+              title
+              ,description
+              ,file_name
+              ,extension
             ) VALUES (
-               ''   -- id - IN int(11)
-              ,?  -- nom - IN varchar(25)
-              ,?  -- descri - IN text
-              ,?   -- id_album - IN int(11)
-              ,0   -- visibilite - IN tinyint(2)
-              ,?  -- nom_fichier - IN text
-              ,? -- nom_fichier_th - IN text
-              ,? -- nom_fichier_m - IN text
+              :title  -- title
+              ,:description  -- description
+              ,:file_name   -- file_name
+              ,:extension   -- extension
             )";
-        $sql = $this->_db->prepare($sql);
-        $sql->execute(array($titre, $description, $id_album, $nom_fichier, $tab['0'] . "_s." . $tab['1'], $tab['0'] . "_m." . $tab['1']));
-        $id_photo = $this->_db->lastInsertId();
-        var_dump($album_defaut);
-        $sql = "UPDATE albums SET
-                nb_photos = nb_photos +1 -- int(11)
-                ,photo_defaut = ? -- int(11)
-                WHERE id = ? -- int(11)";
-        $sql = $this->_db->prepare($sql);
-        if ($album_defaut != 0) {
-            $sql->execute(array($id_photo, $id_album));
+        $description = "Ajoutée le " .date("d/m/Y");
+        $sql = $this->db->prepare($sql);
+        $sql->execute(array(
+            "title"=>$nom_fichier,
+            "description"=> $description,
+            "file_name" => $token_file_name,
+            "extension" => $tab['1']));
+        $id_photo = $this->db->lastInsertId();
+        $sql = "INSERT INTO imagecategory (
+               category_idcategory
+              ,image_idimage
+            ) VALUES (
+               :category , -- id category
+               :image -- id image
+            )";
+        $sql = $this->db->prepare($sql);
+        foreach ($id_categories as $category) {
+            echo $category;
+        $sql->execute(array(
+            "category"=>$category,
+            "image"=> $id_photo));
         }
-        else
-            $sql->execute(array($results['photo_defaut'], $id_album));
     }
 
     function rrmdir($dir) {
@@ -295,7 +230,6 @@ WHERE id = " . $photo . " -- int(11)";
         echo $sql;
         $this->_db->exec($sql);
         print_r($this->_db->errorInfo());
-        $this->im
     }
 
     /**
@@ -412,4 +346,5 @@ WHERE id = " . $photo . " -- int(11)";
     }
 
 }
+
 ?>

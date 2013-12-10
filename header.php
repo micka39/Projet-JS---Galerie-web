@@ -11,6 +11,7 @@
         <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
         <!-- Bootstrap core CSS -->
         <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/design.css" rel="stylesheet">
         <script src="js/functions_backoffice.js"></script>
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
