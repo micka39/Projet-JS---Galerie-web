@@ -3,15 +3,79 @@
     Created on : 10 déc. 2013, 08:54:51
     Author     : lp
     Description:
-        Purpose of the stylesheet follows.
+    Purpose of the stylesheet follows.
 */
-
-root { 
+    root {
     display: block;
 }
-
-.droparea
-{
+    .droparea {
     background-color: #999;
     text-align: center;
+}
+    .lightbox-wrapper {
+    background-color: #3E606F;
+    height: 100%;
+    width: 100%;
+}
+    html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+    .lightbox-image {
+    position: relative;
+    width: 80%;
+    height: 80%;
+    margin: auto;
+    -webkit-align-content: center;
+    -ms-flex-line-pack: center;
+    align-content: center;
+    background-color: #D1DBBD;
+    background-image: url(../upload/52a8c03e2b7a0_m.jpg);
+    filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true,src='../upload/52a8c03e2b7a0_m.jpg',sizingMethod='scale');
+    background-repeat: no-repeat;
+    background-position: center;
+    -webkit-background-size: contain;
+    background-size: contain;
+    color: white;
+    z-index: 4;
+}
+    .lightbox-image-legend {
+    background-color: black;
+    padding-left: 15px;
+    padding-right: 15px;
+    height: 20%;
+    opacity: 0.7;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+}
+    .lightbox-image-legend:hover {
+    opacity: 1;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+}
+    .lightbox-image-left {
+    width: 20%;
+    height: 80%;
+    float: left;
+    background-image: url(../img/arrow-prev.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+    .lightbox-image-right {
+    width: 20%;
+    height: 80%;
+    margin-left: 80%;
+    background-image: url(../img/arrow-next.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+    .lightbox-image-nav:hover {
+    background-color: #91AA9D;
+    opacity: 0.8;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
+}
+    .lightbox-image-nav {
+    background-color: #91AA9D;
+    opacity: 0.5;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
 }
