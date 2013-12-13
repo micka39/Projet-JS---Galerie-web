@@ -69,7 +69,7 @@ class Connection {
         $_SESSION['name_user'] = $this->user_db;
         $_SESSION['connected'] = $this->access_level_db;
         $_SESSION['user_id'] = $this->user_id_db;
-        if($this->access_level_db == 0)
+        if ($this->access_level_db == 0)
             $_SESSION['admin'] = true;
         else
             $_SESSION['admin'] = false;
@@ -94,32 +94,32 @@ VALUES (:username, :password, :level_access, :email )');
         }
     }
 
-    public function modifyUser($username, $id, $email, $password = null) {
-        try {
-            // Si le mot de passe a été changé
-            if ($password != null)
-                $requete = $this->db->prepare('UPDATE user SET
-username = :username, email = :email, password = :password WHERE iduser = :id');
-            if (!$requete->execute(array('username' => $username, 'password' => crypt($password, "js"),
+    public function modifyUser($id, $email, $level_access, $password = null) {
+
+        $requete = NULL;
+        // Si le mot de passe a été changé
+        if ($password != null) {
+            $requete = $this->db->prepare('UPDATE user SET email = :email,
+                    level_access = :access , password = :password WHERE iduser = :id');
+            if (!$requete->execute(array('password' => crypt($password, "js"),
+                        'access' => $level_access,
                         'email' => $email,
                         'id' => $id))) {
-                $message = $requete->errorInfo();
-                print_r($message);
-                throw new PDOException();
-            } else {
-                $requete = $this->db->prepare('UPDATE user SET
-username = :username email = :email, WHERE iduser = :id');
-                if (!$requete->execute(array('username' => $username,
-                            'email' => $email,
-                            'id' => $id))) {
-                    $message = $requete->errorInfo();
-                    print_r($message);
-                    throw new PDOException();
-                }
+                return FALSE;
             }
-        } catch (PDOException $e) {
-            $message = $e->getMessage();
-            echo "Une erreur est survenue durant la modification merci de réesayer";
+
+            return TRUE;
+        } else {
+            $requete = $this->db->prepare('UPDATE user SET email = :email,
+                    level_access = :access WHERE iduser = :id');
+            if (!$requete->execute(array(
+                        'access' => $level_access,
+                        'email' => $email,
+                        'id' => $id))) {
+                return FALSE;
+            }
+
+            return TRUE;
         }
     }
 
@@ -148,14 +148,15 @@ WHERE iduser = :id');
         require_once(__DIR__ . '/config.php');
         $this->db = connectPdo();
 
-        $sql = "SELECT * FROM user WHERE iduser= :iduser";
+        $sql = "SELECT * FROM user WHERE iduser = :iduser";
 
-        $requete = $this->db->prepare($sql);
-        $result = $requete->execute(array('iduser' => $id));
-        $result->setFetchMode(PDO::FETCH_ASSOC);
-        $row = $result->fetch();
+        $request = $this->db->prepare($sql);
+        $request->execute(array('iduser' => $id));
+        $request->setFetchMode(PDO::FETCH_ASSOC);
+        $row = $request->fetch();
         return $row;
     }
+
     /**
      * Vérifie la disponibilité du nom d'utilisateur
      * @param string $username
@@ -164,10 +165,10 @@ WHERE iduser = :id');
         $sql = "SELECT count(*)as nb FROM user WHERE username = :name";
 
         $requete = $this->db->prepare($sql);
-        
+
         $requete->execute(array('name' => $username));
         $row = $requete->fetch();
-        if($row['nb'] == 0)
+        if ($row['nb'] == 0)
             return true;
         return false;
     }

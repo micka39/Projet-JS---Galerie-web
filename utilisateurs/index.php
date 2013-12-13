@@ -15,7 +15,7 @@ require '../header.php';
     </div>
     <div class="row">
         <table class="table">
-            <thead><th>Id</th><th>Nom complet</th><th>Nom d'utilisateur</th><th>Action</th></thead>
+            <thead><th>Id</th><th>Email</th><th>Nom d'utilisateur</th><th>Action</th></thead>
             <tbody>
                 <?php
                 require '../class/connection.class.php';
@@ -30,8 +30,8 @@ require '../header.php';
                         <td><div class="btn-group">
                                 <button class="btn dropdown-toggle" data-toggle="dropdown">Action <span class="caret"></span></button>
                                 <ul class="dropdown-menu">
-                                    <li><a href="utilisateurs/modifier">Modifier</a></li>
-                                    <li><a href="utilisateurs/supprimer">Supprimer</a></li>
+                                    <li><a href="#" data-id="<?php echo $user['iduser']; ?>" class="modifyUser">Modifier</a></li>
+                                    <li><a href="#" data-id="<?php echo $user['iduser']; ?>" class="deleteUser">Supprimer</a></li>
                                 </ul>
                             </div>
                         </td></tr>
@@ -62,6 +62,17 @@ require '../header.php';
 
 <script type="text/javascript">
     $(document).ready(function() {
+        $(".modifyUser").click(function(e) {
+            e.preventDefault(); 
+            e.stopPropagation();
+            showModal("Modifier un utilisateur", "utilisateurs/modifyUser.php?id="+e.currentTarget.dataset['id']);
+        });
+        $(".deleteUser").click(function(e) {
+            e.preventDefault(); 
+            e.stopPropagation();
+            showModal("Suppression d'un utilisateur", "utilisateurs/deleteUser.php?id="+e.currentTarget.dataset['id']);
+        });
+        
         $("#addUser").click(function() {
             showModal("Ajouter un utilisateur", "utilisateurs/addUser.php");
         });
@@ -73,9 +84,13 @@ require '../header.php';
                 type: "GET",
                 url: url
             }).done(function(data) {
+                console.log(data);
                 $("#modalBody").html(data);
             });
             $("#modal").modal('show');
+            $("#modal").on('hidden.bs.modal', function (e) {
+                location.reload();
+            });
         }
 
     });

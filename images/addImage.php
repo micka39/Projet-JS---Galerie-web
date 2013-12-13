@@ -19,6 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             case "image/jpeg":
                 $image->addImage($_POST['category'], $_FILES['photos']['name'], $_FILES['photos']['tmp_name']);
                 break;
+            case "image/pjpeg":
+                $image->addImage($_POST['category'], $_FILES['photos']['name'], $_FILES['photos']['tmp_name']);
+                break;
             default: {
                     $response = array(
                         "success" => "false",
@@ -31,7 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         if($response == "")
             $response = array(
                         "success" => "true",
-                        "code" => "0"
+                        "code" => "0",
+                        "file" => $_FILES['photos']['name']
                     );
     }
     else {
@@ -72,6 +76,10 @@ function showForm() {
                 <p><img src="img/draganddrop.png" alt="Image représentant un glisser déposer"/> Glissez vos images ici</p>
             </div>
 
+            <div class="progress progress-striped active">
+  <div class="progress-bar" id="progress" style="width: 0%;">
+  </div>
+</div>
             <ul id="results"></ul>
         </form>
     </div>
@@ -82,15 +90,20 @@ function showForm() {
             $('#photos').fileupload({
                 beforeSend: function(){
                     fileInUpload ++;
+                    $("#progress").text("Envoi en cours");
                 },
                 url: 'images/addImage.php',
                 dataType: 'json',
                 done: function (e, data) {
                     var json1 = data['result'];
-                    $.each(json1.photos, function(key, val) {
-                        alert(key + ' ' + val);
-                    });
+                    if(json1.success == "true")
+                    $("#results").prepend("<li>"+json1.file+" est bien enregistré !</li>");
+                    else
+                    $("#results").prepend("<li class='alert alert-danger'>"+json1.message+"</li>");
                     fileInUpload --;
+                    $("#progress").css("width", 100/fileInUpload+ "%");
+                    if(fileInUpload == 0)
+                        $("#progress").text("Terminé !")
                 }});
         });
                             

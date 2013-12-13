@@ -131,7 +131,6 @@ function showForm($username = "", $email = "", $message = "") {
                         type: "POST",
                         url: "utilisateurs/addUser.php",
                         data: data,
-                        dataType: "json",
                         success: function(result) {
                             $("#modalBody").html(result);
                             $("#modal").modal('show');

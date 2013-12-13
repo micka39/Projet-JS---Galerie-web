@@ -3,6 +3,8 @@ $titre = "Gestion des images";
 
 require_once '../bootstrap.php';
 require '../header.php';
+$images = new Images();
+$listImages = $images->getPhotos("1");
 ?>
 <div class="jumbotron">
     <div class="container">
@@ -14,7 +16,11 @@ require '../header.php';
         <p><button class="btn btn-primary" id="addUser">Envoyer de nouvelles images</button></p>
     </div>
     <div class="row">
-
+        <?php
+        foreach ($listImages as $image) {
+            echo "<img src='upload/". $image['file_name'] . "_s.". $image['extension'] ."' alt='abd' class='img-thumbnail'>";
+        }
+        ?>
     </div>
 
 </div>

@@ -24,16 +24,26 @@ class Images {
     }
 
     public function getPhotos($album_id, $limite_bas = null) {
-        $result = $this->_db->query("SELECT nb_photos FROM albums WHERE id=" . $album_id);
+        $result = $this->db->query("SELECT COUNT(*) as nb_photos FROM imagecategory WHERE category_idcategory=" . $album_id);
         $results = $result->fetch();
+        //SELECT i.extension,i.file_name,i.idimage FROM imagecategory as ic JOIN image as i ON i.idimage = ic.image_idimage WHERE category_idcategory =1
         if ($results['nb_photos'] > 0) {
             if ($limite_bas == NULL)
-                $sql = "SELECT alb.nom as album_nom, i.id as photo_id, i.nom as photo_nom, i.`descri` as photo_desc,i.nom_fichier_th as photo_fichier, i.nom_fichier_m as photo_m, i.id_album as album_id FROM albums as alb, images as i WHERE i.id_album = " . $album_id . " AND alb.id = " . $album_id . " ORDER BY i.id LIMIT 0,9 ";
+                $sql = "SELECT i.extension,i.file_name,i.idimage FROM
+                    imagecategory as ic
+                    JOIN image as i ON i.idimage = ic.image_idimage
+                    WHERE category_idcategory =1
+                    ORDER BY i.idimage LIMIT 0,9 ";
             else {
                 $limite_haut = $limite_bas + $_images_par_page;
-                $sql = "SELECT alb.nom as album_nom, i.id as photo_id, i.nom as photo_nom, i.`descri` as photo_desc,i.nom_fichier_th as photo_fichier, i.id_album as album_id, i.nom_fichier_m as photo_m, FROM albums as alb, images as i WHERE i.id_album = " . $album_id . " AND alb.id = " . $album_id . " ORDER BY i.id LIMIT " . $limite_bas . "," . $limite_haut;
+                $sql = "SELECT i.extension,i.file_name,i.idimage FROM
+                    imagecategory as ic
+                    JOIN image as i ON i.idimage = ic.image_idimage
+                    WHERE category_idcategory =1
+                    ORDER BY i.idimage 
+                    LIMIT " . $limite_bas . "," . $limite_haut;
             }
-            $result = $this->_db->query($sql);
+            $result = $this->db->query($sql);
             $results = $result->fetchAll();
             return $results;
         } else {
@@ -108,7 +118,6 @@ class Images {
             )";
         $sql = $this->db->prepare($sql);
         foreach ($id_categories as $category) {
-            echo $category;
         $sql->execute(array(
             "category"=>$category,
             "image"=> $id_photo));
