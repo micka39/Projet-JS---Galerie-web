@@ -18,7 +18,7 @@ $listImages = $images->getPhotos("1");
     <div class="row">
         <?php
         foreach ($listImages as $image) {
-            echo "<img src='upload/". $image['file_name'] . "_s.". $image['extension'] ."' alt='abd' class='img-thumbnail'>";
+            echo "<img src='upload/". $image['file_name'] . "_s.". $image['extension'] ."' data-id='".$image['idimage']."' alt='abd' class='img-thumbnail img-modal'>";
         }
         ?>
     </div>
@@ -41,8 +41,9 @@ $listImages = $images->getPhotos("1");
 
 <script type="text/javascript">
     $(document).ready(function() {
-        $("#addUser").click(function() {
-            showModal("Ajout d'image(s)", "images/addImage.php");
+        $(".img-modal").click(function(e) {
+            
+            showModal("Modification d'image", "images/modifyImage.php?id="+e.currentTarget.dataset['id']);
         });
 
         function showModal(title, url)

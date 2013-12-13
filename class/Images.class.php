@@ -14,10 +14,8 @@ class Images {
     }
 
     public function getPhoto($photo_id) {
-        $sql = "SELECT a.id as album_id ,a.nom as album_nom, a.descri as album_desc,a.token as token,
-            i.id as image_id, i.nom as photo_nom,i.nom_fichier_m as photo_fichier,
-            i.descri as photo_desc ,i.visibilite as photo_visibilite, i.nom_fichier_th as photo_thumb,i.nom_fichier as photo_o FROM albums as a, images as i WHERE a.id = i.id_album AND i.id =" . $photo_id;
-        $result = $this->_db->query($sql);
+        $sql = "SELECT i.* FROM image as i WHERE idimage =" . $photo_id;
+        $result = $this->db->query($sql);
 
         $results = $result->fetch();
         return $results;
