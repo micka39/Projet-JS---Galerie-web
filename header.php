@@ -6,8 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Projet de galerie web IUT A - Bourg en Bresse">
-    <script src="js/typeahead.js"></script>
-    <script src="js/typeahead.min.js"></script>
     <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
     <base href="http://localhost/ProjetJS/"/>
 
