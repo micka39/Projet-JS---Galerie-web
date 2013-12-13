@@ -13,23 +13,23 @@ include_once("header.php"); ?>
     <div class="container">
       <!-- Example row of columns -->
       <div class="row">
-
-      </div>
+          <a href="category.php"><button type="button" class="btn btn-default navbar-btn">Categorie</button></a>
+          <label for="autocomplete" style="display: block">Rechercher une image:</label>
+           <input type="text" class="form-control" id="autocomplete" name="autocomplete" style="width: 25%; display: inline" data-provide="typeahead" placeholder="Rechercher">
+           <button type="button" class="btn btn-default" style="display: inline" >Rechercher</button>
+           
+           <script type="text/javascript">
+$(function (){
+   var deps = ['Ain','Aisne','Allier','Alpes de-Htes','Alpes de-Htes Provence','Hautes-Alpes',
+'Alpes-Maritimes','Ardèche','Ardennes','Ariege','Aube','Aude','Aveyron','Bouches-du-Rhône','Calvados',
+'Cantal','Charente','Charente-Maritime','Cher','Correze','Côte d\'Or', 'Côtes d\'Armor','Creuse',
+'Dordogne','Doubs','Drome','Eure','Eure-et-Loire','Finistère'];
+   $('#autocomplete').typeahead({source: deps});
+});  
+</script>
+      </div> 
 
       <hr>
 
-      <footer>
-        <p>&copy; Company 2013</p>
-      </footer>
-    </div> <!-- /container -->
-
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-    <script src="../../dist/js/bootstrap.min.js"></script>
-  </body>
-</html>
 
 <?php include_once("footer.php"); ?>
