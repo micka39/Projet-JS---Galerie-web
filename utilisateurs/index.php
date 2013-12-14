@@ -65,12 +65,12 @@ require '../header.php';
         $(".modifyUser").click(function(e) {
             e.preventDefault(); 
             e.stopPropagation();
-            showModal("Modifier un utilisateur", "utilisateurs/modifyUser.php?id="+e.currentTarget.dataset['id']);
+            showModal("Modifier un utilisateur", "utilisateurs/modifyUser.php?id="+$(this).data("id"));
         });
         $(".deleteUser").click(function(e) {
             e.preventDefault(); 
             e.stopPropagation();
-            showModal("Suppression d'un utilisateur", "utilisateurs/deleteUser.php?id="+e.currentTarget.dataset['id']);
+            showModal("Suppression d'un utilisateur", "utilisateurs/deleteUser.php?id="+$(this).data("id"));
         });
         
         $("#addUser").click(function() {
@@ -93,7 +93,7 @@ require '../header.php';
                 $("#modalBody").html(data);
             });
             $("#modal").modal('show');
-            $("#modal").on('hidden.bs.modal', function (e) {
+            $("#modal").on('hidden.bs.modal', function () {
                 location.reload();
             });
         }

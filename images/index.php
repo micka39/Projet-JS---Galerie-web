@@ -13,12 +13,16 @@ $listImages = $images->getPhotos("1");
 </div>
 <div class="container">
     <div class="row">
-        <p><button class="btn btn-primary" id="addUser">Envoyer de nouvelles images</button></p>
+        <p><button class="btn btn-primary" id="addImage">Envoyer de nouvelles images</button></p>
     </div>
     <div class="row">
         <?php
-        foreach ($listImages as $image) {
-            echo "<img src='upload/". $image['file_name'] . "_s.". $image['extension'] ."' data-id='".$image['idimage']."' alt='abd' class='img-thumbnail img-modal'>";
+        if (!is_string($listImages)) {
+            foreach ($listImages as $image) {
+                echo "<img src='upload/" . $image['file_name'] . "_s." . $image['extension'] . "' data-id='" . $image['idimage'] . "' alt='abd' class='img img-overlay img-modal'>";
+            }
+        } else {
+            echo $listImages;
         }
         ?>
     </div>
@@ -41,9 +45,11 @@ $listImages = $images->getPhotos("1");
 
 <script type="text/javascript">
     $(document).ready(function() {
-        $(".img-modal").click(function(e) {
-            
-            showModal("Modification d'image", "images/modifyImage.php?id="+e.currentTarget.dataset['id']);
+        $("#addImage").click(function() {
+            showModal("Ajout d'image(s)", "images/addImage.php");
+        });
+        $(".img-modal").click(function() {
+            showModal("Modification d'image", "images/modifyImage.php?id=" + $(this).data("id"));
         });
 
         function showModal(title, url)
@@ -53,7 +59,7 @@ $listImages = $images->getPhotos("1");
                 type: "GET",
                 url: url,
                 statusCode: {
-                    403: function(){
+                    403: function() {
                         location.reload();
                     }
                 }
