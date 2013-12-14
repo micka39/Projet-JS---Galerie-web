@@ -29,13 +29,34 @@
                         data: data,
                         success: function(result) {
                             if(result === "connect")
+                            {
                                 $("#connection").html("<p class='navbar-text'>Vous êtes connecté en tant que "+ $("#usernameConnect").val() + " .</p>");
+                                location.reload();
+                            }
                             else
                                 alert("Connexion impossible, veuillez vérifier vos informations");
                         },
                         error: function(xhr, type, thrownError) {
 
-                            alert(thrownError);
+                            alert("Une erreur inattendue s'est produite, merci de réesayer.");
+
+                        }
+
+                    });
+                });
+                
+                $("#disconnect").click(function(event) {
+                    event.preventDefault();
+                    $.ajax({
+                        type: "POST",
+                        url: "ajax/users/disconnect.php",
+                        success: function(result) {
+                            $("#connection").html("<p class='navbar-text'>Vous êtes maintenant déconnecté.</p>");
+                            
+                        },
+                        error: function(xhr, type, thrownError) {
+
+                            alert("Une erreur inattendue s'est produite, merci de réesayer.");
 
                         }
 
@@ -65,7 +86,7 @@
                         if(isset($_SESSION["connected"]))
                         {
                             echo "<p class='navbar-text'>Vous êtes connecté en tant que ".$_SESSION['name_user']. 
-                                    " . <a href='utilisateurs/deconnexion'>Deconnexion</a></p>";
+                                    " . <a href='utilisateurs/disconnect.php' id='disconnect'>Deconnexion</a></p>";
                             ?>
                         
                         <?php

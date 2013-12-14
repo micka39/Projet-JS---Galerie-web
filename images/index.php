@@ -51,7 +51,12 @@ $listImages = $images->getPhotos("1");
             $("#modalTitle").text(title);
             $.ajax({
                 type: "GET",
-                url: url
+                url: url,
+                statusCode: {
+                    403: function(){
+                        location.reload();
+                    }
+                }
             }).done(function(data) {
                 $("#modalBody").html(data);
             });

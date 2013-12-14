@@ -82,7 +82,12 @@ require '../header.php';
             $("#modalTitle").text(title);
             $.ajax({
                 type: "GET",
-                url: url
+                url: url,
+                statusCode: {
+                    403: function(){
+                        location.reload();
+                    }
+                }
             }).done(function(data) {
                 console.log(data);
                 $("#modalBody").html(data);
