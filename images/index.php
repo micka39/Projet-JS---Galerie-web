@@ -18,8 +18,22 @@ $listImages = $images->getPhotos("1");
     <div class="row">
         <?php
         if (!is_string($listImages)) {
+            $i = 1;
             foreach ($listImages as $image) {
-                echo "<img src='upload/" . $image['file_name'] . "_s." . $image['extension'] . "' data-id='" . $image['idimage'] . "' alt='abd' class='img img-overlay img-modal'>";
+                if($i == 1)
+                    echo "<div class='line'>";
+                echo "<div class='img-group'>"
+                . "<img src='upload/" . $image['file_name'] . "_s." . $image['extension'] . "'  alt='abd' class='img'/>"
+                        . "<div class='img-overlay' data-id='" . $image['idimage'] . "'></div>"
+                        . "</div>";
+                // Trois images par ligne
+                if($i == 3)
+                {
+                  echo "</div>";
+                  $i=1;
+                }
+                else
+                $i++;
             }
         } else {
             echo $listImages;
@@ -48,7 +62,7 @@ $listImages = $images->getPhotos("1");
         $("#addImage").click(function() {
             showModal("Ajout d'image(s)", "images/addImage.php");
         });
-        $(".img-modal").click(function() {
+        $(".img-overlay").click(function() {
             showModal("Modification d'image", "images/modifyImage.php?id=" + $(this).data("id"));
         });
 
@@ -67,6 +81,9 @@ $listImages = $images->getPhotos("1");
                 $("#modalBody").html(data);
             });
             $("#modal").modal('show');
+            $("#modal").on('hidden.bs.modal', function() {
+                $("#modalBody").html("");
+            });
         }
 
     });

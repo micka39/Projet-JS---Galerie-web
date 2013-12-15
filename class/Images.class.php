@@ -24,17 +24,16 @@ class Images {
     public function getPhotos($album_id, $limite_bas = null) {
         $result = $this->db->query("SELECT COUNT(*) as nb_photos FROM imagecategory WHERE category_idcategory=" . $album_id);
         $results = $result->fetch();
-        //SELECT i.extension,i.file_name,i.idimage FROM imagecategory as ic JOIN image as i ON i.idimage = ic.image_idimage WHERE category_idcategory =1
         if ($results['nb_photos'] > 0) {
             if ($limite_bas == NULL)
-                $sql = "SELECT i.extension,i.file_name,i.idimage FROM
+                $sql = "SELECT i.extension,i.file_name,i.idimage,i.title,i.description FROM
                     imagecategory as ic
                     JOIN image as i ON i.idimage = ic.image_idimage
                     WHERE category_idcategory =1
-                    ORDER BY i.idimage LIMIT 0,9 ";
+                    ORDER BY i.idimage LIMIT 0,100 ";
             else {
                 $limite_haut = $limite_bas + $_images_par_page;
-                $sql = "SELECT i.extension,i.file_name,i.idimage FROM
+                $sql = "SELECT i.extension,i.file_name,i.idimage,i.title,i.description FROM
                     imagecategory as ic
                     JOIN image as i ON i.idimage = ic.image_idimage
                     WHERE category_idcategory =1
@@ -49,27 +48,9 @@ class Images {
         }
     }
 
-    public function getAlbumInfo($album_id) {
-        $sql = "SELECT id, nom, descri, token FROM albums WHERE id = {$album_id}";
-
-        $result = $this->_db->query($sql);
-        if (($result->rowCount()) >= 1) {
-            $results = $result->fetch();
-            return $results;
-        }
-        else
-            return 0;
-    }
-
-    public function getAlbums($limite_bas = null) {
-        if ($limite_bas == null)
-            $sql = "SELECT a.id, a.nom, a.descri, a.nb_photos, a.token,a.photo_defaut, i.nom_fichier_th, i.descri as descri1 FROM albums as a LEFT OUTER JOIN images as i ON a.photo_defaut = i.id ORDER BY a.id LIMIT 0,10 ";
-        else {
-            $limite_haut = $limite_bas + $_albums_par_page;
-            $sql = "SELECT a.id, a.nom, a.descri, a.nb_photos, a.token,a.photo_defaut, i.nom_fichier_th, i.descri as descri1 FROM albums as a LEFT OUTER JOIN images as i ON a.photo_defaut = i.id ORDER BY a.id LIMIT " . $limite_bas . "," . $limite_haut;
-        }
-
-        $result = $this->_db->query($sql);
+    public function getCategories() {
+        $sql = "SELECT idcategory as id, name,description FROM category";
+        $result = $this->db->query($sql);
         $results = $result->fetchAll();
         return $results;
     }
@@ -78,13 +59,8 @@ class Images {
         $token_file_name = uniqid();
         $path_album = __DIR__ . '../../upload/';
         $path_image_dest = $path_album . $token_file_name;
-//        if (move_uploaded_file($nom_fichier_temp, $path_image_dest))
-//            $retour[0] = "L'image a ete correctement transferee !";
-//        else {
-//            $retour[0] = "Erreur durant le transfert du fichier. Merci de reesayer. ";
-//        }
         $tab = explode(".", $nom_fichier);
-        
+
         $this->imagethumb($nom_fichier_temp, $path_album . $token_file_name . "_s." . $tab['1'], 200);
         $this->imagethumb($nom_fichier_temp, $path_album . $token_file_name . "_m." . $tab['1'], 1024);
         $this->imagethumb($nom_fichier_temp, $path_album . $token_file_name . "_l." . $tab['1'], 2048);
@@ -99,11 +75,11 @@ class Images {
               ,:file_name   -- file_name
               ,:extension   -- extension
             )";
-        $description = "Ajoutée le " .date("d/m/Y");
+        $description = "Ajoutée le " . date("d/m/Y");
         $sql = $this->db->prepare($sql);
         $sql->execute(array(
-            "title"=>$nom_fichier,
-            "description"=> $description,
+            "title" => $nom_fichier,
+            "description" => $description,
             "file_name" => $token_file_name,
             "extension" => $tab['1']));
         $id_photo = $this->db->lastInsertId();
@@ -116,127 +92,62 @@ class Images {
             )";
         $sql = $this->db->prepare($sql);
         foreach ($id_categories as $category) {
-        $sql->execute(array(
-            "category"=>$category,
-            "image"=> $id_photo));
-        }
-    }
-
-    function rrmdir($dir) {
-        foreach (glob($dir . '/*') as $file) {
-            if (is_dir($file))
-                rrmdir($file);
-            else
-                unlink($file);
-        }
-        rmdir($dir);
-    }
-
-    function deleteAlbum($id) {
-        $sql = "SELECT * FROM albums WHERE id=" . $id;
-        $data_album = $this->_db->query($sql)->fetch();
-        echo $data_album['token'];
-        $dir = "../../../upload/" . $data_album['token'] . "/";
-        if (file_exists($dir)) {
-            echo "<pre>";
-            print_r(scandir($dir));
-            echo "</pre>";
-            $this->rrmdir($dir);
-        }
-        if (!file_exists($dir)) {
-            echo "Dossier supprimé du disque <br />";
-            $sql = "DELETE FROM images WHERE id_album=" . $id;
-            $this->_db->exec($sql);
-            echo "Toutes les images de l'album ont effacées de la base de données <br/>";
-            $sql = "DELETE FROM images_comment WHERE id_album=" . $id;
-            $this->_db->exec($sql);
-            echo "Tous les commentaires associés aux images de cet album ont été supprimés<br/>";
-            $sql = "DELETE FROM albums WHERE id=" . $id;
-            $this->_db->exec($sql);
-            echo "Album totalement supprimé de la base de données<br/>";
-        } else {
-            echo "Une erreur est survenue lors de la tentative de suppression du dossier<br/>";
-            echo "S'il s'agit de la premiere fois, reesayez. Dans le cas contraire merci de m'adresser un mail.";
+            $sql->execute(array(
+                "category" => $category,
+                "image" => $id_photo));
         }
     }
 
     function deleteImage($id) {
         $photo = $this->getPhoto($id);
-        echo "<pre>";
-        print_r($photo);
-        echo "</pre>";
-        $dir = "../../../upload/" . $photo['token'] . "/";
-        if (file_exists($dir . $photo['photo_o'])) {
-            if (is_file($dir . $photo['photo_o'])) {
-                unlink($dir . $photo['photo_o']);
-                echo "L'image originale supprimée .";
-            }
-            else
-                echo "Le fichier image n'existait pas";
+        $dir = __DIR__ . '../../upload/';
+        $message = "";
+        if (file_exists($dir . $photo['file_name'] . "_s." . $photo['extension'])) {
+            if (is_file($dir . $photo['file_name'] . "_s." . $photo['extension'])) {
+                unlink($dir . $photo['file_name'] . "_s." . $photo['extension']);
+            } else
+                $message += "L'image de taille miniature n'existait pas";
         }
-        if (file_exists($dir . $photo['photo_fichier'])) {
-            if (is_file($dir . $photo['photo_fichier'])) {
-                unlink($dir . $photo['photo_fichier']);
-                echo "L'image de taille moyenne supprimée .";
-            }
-            else
-                echo "Le fichier image n'existait pas";
+        if (file_exists($dir . $photo['file_name'] . "_m." . $photo['extension'])) {
+            if (is_file($dir . $photo['file_name'] . "_m." . $photo['extension'])) {
+                unlink($dir . $photo['file_name'] . "_m." . $photo['extension']);
+            } else
+                $message += "L'image de taille moyenne n'existait pas";
         }
-        if (file_exists($dir . $photo['photo_thumb'])) {
-            if (is_file($dir . $photo['photo_thumb'])) {
-                unlink($dir . $photo['photo_thumb']);
-                echo "L'image miniature supprimée .";
-            }
-            else
-                echo "Le fichier image n'existait pas";
+        if (file_exists($dir . $photo['file_name'] . "_l." . $photo['extension'])) {
+            if (is_file($dir . $photo['file_name'] . "_l." . $photo['extension'])) {
+                unlink($dir . $photo['file_name'] . "_l." . $photo['extension']);
+            } else
+                $message += "L'image de taille large n'existait pas";
         }
-        $sql = "DELETE FROM images WHERE id=" . $id;
-        $this->_db->exec($sql);
-        echo "Image supprimée de la base de données";
-        $sql = "SELECT photo_defaut FROM albums WHERE id=" . $photo['album_id'];
-        $retour = $this->_db->query($sql)->fetch();
-        if ($retour['photo_defaut'] == $id) {
-            $sql = "UPDATE albums SET
-                nb_photos = nb_photos -1
-                , photo_defaut = 0
-                WHERE id = " . $photo['album_id'];
-            echo "L'album ne contient plus d'image pas défaut !";
-        } else {
-            $sql = "UPDATE albums SET
-                nb_photos = nb_photos -1
-                WHERE id = " . $photo['album_id'];
-            echo "L'image pas défaut de l'album n'a pas été modifiée";
-        }
-        $this->_db->exec($sql);
+
+        $sql = "DELETE FROM imagecategory WHERE image_idimage= :id";
+        $requete = $this->db->prepare($sql);
+        $requete->execute(array(
+            "id" => $id
+        ));
+
+        $sql = "DELETE FROM image WHERE idimage= :id";
+        $requete = $this->db->prepare($sql);
+        $requete->execute(array(
+            "id" => $id
+        ));
+        return $message;
     }
 
-    function updateAlbum($titre, $description, $visibilite, $image_defaut, $id) {
-        $sql = "UPDATE albums SET
-   nom = '" . $titre . "' -- varchar(50)
-  ,descri = '" . $description . "' -- text
-  ,visibilite = " . $visibilite . " -- tinyint(2)
-  ,photo_defaut = " . $image_defaut . " -- int(11)
-WHERE id = " . $id . " -- int(11)";
-        $this->_db->exec($sql);
-        print_r($this->_db->errorInfo());
-    }
+    function updatePhoto($title, $description, $id) {
 
-    function updatePhoto($titre, $description, $photo_defaut, $photo, $album) {
-        if ($photo_defaut == 1) {
-            $sql = "UPDATE albums SET
-   photo_defaut = " . $photo . " -- int(11)
-WHERE id = " . $album . " -- int(11)";
-            $this->_db->exec($sql);
-            print_r($this->_db->errorInfo());
-        }
 
-        $sql = "UPDATE images SET
-   nom = '" . $titre . "' -- varchar(25)
-  ,descri = '" . $description . "' -- text
-WHERE id = " . $photo . " -- int(11)";
-        echo $sql;
-        $this->_db->exec($sql);
-        print_r($this->_db->errorInfo());
+        $sql = "UPDATE image SET
+                title = :title
+                ,description = :description
+                WHERE idimage = :id";
+        $requete = $this->db->prepare($sql);
+        $requete->execute(array(
+            "title" => $title,
+            "description" => $description,
+            "id" => $id
+        ));
     }
 
     /**
@@ -353,5 +264,3 @@ WHERE id = " . $photo . " -- int(11)";
     }
 
 }
-
-?>
