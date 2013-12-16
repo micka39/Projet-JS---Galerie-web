@@ -17,50 +17,59 @@
         <div id="galery">
 
         </div>
-        <ul class="category" data-name="Non catégorisé" data-id="1" data-description="Hello world">
-            <?php
-            $images = new Images();
+        <?php
+        $images = new Images();
+        $categories = $images->getCategories();
+        foreach ($categories as $category) {
 
-            $listImages = $images->getPhotos(1);
+            echo "<ul class='hide category' data-name='" . $category['name'] . "' 
+            data-id='" . $category['id'] . "' 
+                data-description='" . $category['description'] . "'>";
 
+            $listImages = $images->getPhotos($category['id']);
             if (!is_string($listImages)) {
                 foreach ($listImages as $image) {
                     echo "<li data-id='" . $image['idimage'] . "' data-large='upload/" . $image['file_name'] . "_l." . $image['extension'] . "'"
                     . " data-medium='upload/" . $image['file_name'] . "_m." . $image['extension'] . "'"
                     . " data-small='upload/" . $image['file_name'] . "_s." . $image['extension'] . "'"
                     . " data-title='" . $image['title'] . "' data-description='" . $image['description'] . "'>"
-                    . "<img src='upload/" . $image['file_name'] . "_s." . $image['extension'] . "'  alt='abd' class='img'/>"
+                    . "<img src='upload/" . $image['file_name'] . "_s." . $image['extension'] . "'  alt='" . $image['description'] . "' class='img'/>"
                     . "</li>";
                 }
             } else {
                 echo $listImages;
             }
-            ?>
-        </ul>
-        <a href="#" id="modal2">Afficher la modale !</a>
+            echo "</ul>";
+        }
+        ?>
         <div class="lightbox-wrapper" id="lightbox">
+
+            <div class="lightbox-images-category" id="lightbox-images-category"></div>
             <div class="lightbox-nav">
                 <img src="img/close.png" height="40" width="40" alt="fermer la fenêtre" id="lightboxClose" class="lightbox-nav-close" />
                 <img src="img/arrow-prev.png" height="60" width="60" alt="fermer la fenêtre" id="lightbox-image-prev" />
                 <img src="img/arrow-next.png" height="60" width="60" alt="fermer la fenêtre" id="lightbox-image-next" />
 
             </div>
-            <div class="lightbox-images-category" id="lightbox-images-category"></div>
             <div class="lightbox-image" id="lightbox-image">
                 <img src="upload/52a87ef732647_m.jpg" class="lightbox-img" id="lightbox-img"/>
 
 
             </div>
             <div class="lightbox-image-legend">
-                <h1>Une photo</h1>
-                <hr/>Image prise le 15 janvier 2013.Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna. Nunc viverra imperdiet enim. Fusce est. Vivamus a tellus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin pharetra nonummy pede. Mauris et orci. Aenean nec lorem. In porttitor. Donec laoreet nonummy augue. Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Mauris eget neque at sem venenatis eleifend. Ut nonummy. Fusce aliquet pede non pede. Suspendisse dapibus lorem pellentesque magna. Integer nulla. Donec blandit feugiat ligula. Donec hendrerit, felis et imperdiet euismod, purus ipsum pretium metus, in lacinia nulla nisl eget sapien. Donec ut est in lectus consequat consequat. Etiam eget dui. Aliquam erat volutpat. Sed at lorem in nunc porta tristique. Proin nec augue.
-
+                <h1 id="lightbox-title">Une photo</h1>
+                <hr/>
+                <span id="lightbox-description">Image prise le 15 janvier 2013.Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna. Nunc viverra imperdiet enim. Fusce est. Vivamus a tellus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin pharetra nonummy pede. Mauris et orci. Aenean nec lorem. In porttitor. Donec laoreet nonummy augue. Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Mauris eget neque at sem venenatis eleifend. Ut nonummy. Fusce aliquet pede non pede. Suspendisse dapibus lorem pellentesque magna. Integer nulla. Donec blandit feugiat ligula. Donec hendrerit, felis et imperdiet euismod, purus ipsum pretium metus, in lacinia nulla nisl eget sapien. Donec ut est in lectus consequat consequat. Etiam eget dui. Aliquam erat volutpat. Sed at lorem in nunc porta tristique. Proin nec augue.
+                </span>
 
             </div>
         </div>
 
 
         <script type="text/javascript">
+            
+            
+            var categories = new Array();
             function Category(name, description, id)
             {
                 this.name = name;
@@ -78,17 +87,25 @@
                 this.id = id;
                 this.description = description;
             }
+    
+            function showCategory(category)
+            {
+                showImages(category.images,category.id);
+                $("#sidebar >ul>li").removeClass("active");
+                $("#sidebar >ul>li[data-id='" + category.id + "']").addClass("active");
+            }
 
-            function showImages(images)
+            function showImages(images,idCategory)
             {
                 var img = "";
+                var imageNumber =1;
                 $.each(images, function(i, image)
                 {
                     if (imageNumber === 1)
                         img += "<div class='line'>";
                     img += "<div class='img-group'>";
                     img += "<img class='img' src='" + image.small + "' title='" + image.title + "' description='" + image.description + "'/>";
-                    img += "<div class='img-overlay' data-id='" + image.id + "'></div></div>";
+                    img += "<div class='img-overlay' data-id='" + image.id + "' data-category='"+idCategory+"'></div></div>";
                     if (imageNumber >= 3)
                     {
                         img += "</div>";
@@ -98,19 +115,21 @@
                         imageNumber++;
                 });
 
-                return img;
+                $("#galery").html("");
+                $("#galery").append(img);
+                $(".img-overlay").click(function() {
+                    id = $(this).data("id");
+                    idCategory = $(this).data("category");
+                    
+                    var category = getCategoryById(idCategory);
+                    var image = $.grep(category.images, function(image, i)
+                    {
+                        if (image.id === id)
+                            return image;
+                    });
+                    showModal(image[0], category);
+                });
             }
-            
-            function scrollToElement(selector, time, verticalOffset) {
-			time = typeof(time) != 'undefined' ? time : 500;
-			verticalOffset = typeof(verticalOffset) != 'undefined' ? verticalOffset : 0;
-			element = $(selector);
-			offset = element.offset();
-			offsetTop = offset.top + verticalOffset;
-			$('html, body, div.lightbox-images-category').animate({
-				scrollTop: offsetTop
-			}, time);			
-		}
 
             function showModal(image, category)
             {
@@ -125,12 +144,12 @@
 
                 });
                 $("#lightbox-images-category").html(img);
+                $("#lightbox-title").text(image.title);
+                //$("#lightbox-description").text(image.description);
                 scr = $("#lightbox-images-category >img[data-id='" + image.id + "']").scrollTop();
                 $("#lightbox").fadeIn('fast',function(){
-                    window.setTimeout(1600,$("div.lightbox-images-category").scrollTop($("#lightbox-images-category >img[data-id='" + image.id + "']").offset().top));
-                
-                //scrollToElement("#lightbox-images-category >img[data-id='" + image.id + "']");
-    });
+                    $("div.lightbox-images-category").scrollTop($("#lightbox-images-category >img[data-id='" + image.id + "']").offset().top);
+                });
                 
                 $("#lightboxClose").bind('click', function() {
                     $("#lightbox").fadeOut();
@@ -145,21 +164,34 @@
                     if (keycode == "39") {
                         changeImage();
                     }
+                    
+                    if (keycode == "27") {
+                        $("#lightbox").fadeOut();
+                        $(document).unbind("keyup");
+                    }
 
                 });
+            }
+            
+            function getCategoryById(id)
+            {
+                var category = $.grep(categories, function(category, i)
+                {
+                    if (category.id === id)
+                        return category;
+                });
+                return category[0];
             }
 
             $(document).ready(function() {
                 imageNumber = 1;
-                var categories = new Array();
                 var htmlCategories = "<ul>";
-                $(".category").each(function()
+                $(".category").each(function(i)
                 {
                     var category = new Category(
-                            $(this).data("name"),
-                            $(this).data("description"),
-                            $(this).data("id"));
-
+                    $(this).data("name"),
+                    $(this).data("description"),
+                    $(this).data("id"));
                     var images = new Array();
                     $(".category[data-id='" + category.id + "'] >li").each(function(i, image)
                     {
@@ -170,35 +202,35 @@
                         image.medium = $(this).data("medium");
                         image.small = $(this).data("small");
                         image.title = $(this).data("title");
-
+                        
+                        console.log(category.id + " img" + image.id);
                         images.push(image);
                     });
                     category.images = images;
-                    htmlCategories += "<li>" + category.name + "(" + images.length + " images)</li>";
+                    if(i === 0)
+                        htmlCategories += "<li class='category active' data-id='"+category.id+"'>" + category.name + "(" + images.length + " images)</li>";
+                    else
+                        htmlCategories += "<li class='category' data-id='"+category.id+"'>" + category.name + "(" + images.length + " images)</li>";
                     categories.push(category);
                 }
-                );
+            );
 
                 htmlCategories += "</ul>";
                 $("#sidebar").append(htmlCategories);
-                $("#galery").append(showImages(categories[0].images));
-                $(".img-overlay").click(function() {
-                    console.log($(this).data("id"));
+                showImages(categories[0].images,categories[0].id );
+        
+                $(".category").click(function()
+                {
                     id = $(this).data("id");
-                    var image = $.grep(categories[0].images, function(image, i)
+                    var category = $.grep(categories, function(category, i)
                     {
-                        if (image.id === id)
-                            return image;
+                        if (category.id === id)
+                            return category;
                     });
-                    showModal(image[0], categories[0]);
+                    console.log(category);
+                    showCategory(category[0]);
                 });
-                $("#modal").click(function() {
-                    $("#lightbox").fadeOut();
-                    $(document).unbind("keyup");
-                });
-                $("#modal2").click(function() {
-                    showModal(21, 0);
-                });
+                
                 $("#lightbox-image-prev").click(function() {
                     $("#lightbox-image").fadeOut(500, function() {
                         $("#img").attr("src", "upload/52a87ef71b556_m.jpg");

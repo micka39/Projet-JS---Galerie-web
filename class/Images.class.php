@@ -29,14 +29,14 @@ class Images {
                 $sql = "SELECT i.extension,i.file_name,i.idimage,i.title,i.description FROM
                     imagecategory as ic
                     JOIN image as i ON i.idimage = ic.image_idimage
-                    WHERE category_idcategory =1
+                    WHERE category_idcategory =" . $album_id."
                     ORDER BY i.idimage LIMIT 0,100 ";
             else {
                 $limite_haut = $limite_bas + $_images_par_page;
                 $sql = "SELECT i.extension,i.file_name,i.idimage,i.title,i.description FROM
                     imagecategory as ic
                     JOIN image as i ON i.idimage = ic.image_idimage
-                    WHERE category_idcategory =1
+                    WHERE category_idcategory =" . $album_id."
                     ORDER BY i.idimage 
                     LIMIT " . $limite_bas . "," . $limite_haut;
             }

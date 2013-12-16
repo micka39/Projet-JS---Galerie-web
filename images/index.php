@@ -82,7 +82,7 @@ $listImages = $images->getPhotos("1");
             });
             $("#modal").modal('show');
             $("#modal").on('hidden.bs.modal', function() {
-                $("#modalBody").html("");
+                location.reload();
             });
         }
 
