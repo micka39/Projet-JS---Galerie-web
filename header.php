@@ -1,3 +1,4 @@
+<?php $base  = "http://localhost/js/"; ?>
 <!DOCTYPE html>
 <html lang="fr">
     <head>
@@ -5,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="Projet de galerie web IUT A - Bourg en Bresse">
-        <base href="http://localhost/js/"/>
+        <base href="<?php echo $base; ?>"/>
         <title><?php echo $titre; ?></title>
 
         <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
@@ -14,9 +15,9 @@
         <link href="css/design.css" rel="stylesheet">
         <script src="js/functions_backoffice.js"></script>
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!--[if lt IE 9]>
-          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-          <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <!--[if lte IE 8]>
+          <script src="<?php echo $base; ?>js/html5shiv.js"></script>
+          <script src="<?php echo $base; ?>js/respond.min.js"></script>
         <![endif]-->
         <script type="text/javascript">
             $(document).ready(function() {

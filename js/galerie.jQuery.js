@@ -1,6 +1,12 @@
 (function($) {
 
-    $.fn.galerie = function() {
+    /**
+     * Plugin de galerie jQuery
+     * @param {boolean} responsive True si les trois types d'image sont renseignés
+     * @param {integer} duration La durée en ms entre chaque slide durant le diaporama
+     * @returns {_L1.$.fn} Retourne l'objet
+     */
+    $.fn.galerie = function(responsive, duration) {
 
         //contenu du plugin
 
@@ -17,12 +23,21 @@
             var images = new Array();
             $(".category[data-id='" + category.id + "'] >li").each(function(i, image)
             {
-                var image = new Image();
+                var image = new ImageClass();
                 image.description = $(this).data("description");
                 image.id = $(this).data("id");
-                image.large = $(this).data("large");
-                image.medium = $(this).data("medium");
-                image.small = $(this).data("small");
+                if (responsive === true)
+                {
+                    image.large = $(this).data("large");
+                    image.medium = $(this).data("medium");
+                    image.small = $(this).data("small");
+                }
+                else
+                {
+                    image.medium = $(this).data("medium");
+                    image.large = image.medium;
+                    image.small = image.medium;
+                }
                 image.title = $(this).data("title");
 
                 images.push(image);
@@ -70,7 +85,7 @@
             this.images;
         }
 
-        function Image(small, medium, large, title, id, description)
+        function ImageClass(small, medium, large, title, id, description)
         {
             this.small = small;
             this.medium = medium;
@@ -89,6 +104,7 @@
 
         function showImages(images, idCategory)
         {
+            var imgToDownload = new Array();
             var img = "";
             var imageNumber = 1;
             $.each(images, function(i, image)
@@ -105,10 +121,12 @@
                 }
                 else
                     imageNumber++;
+                imgToDownload.push(image.medium);
             });
 
             $("#galery").html("");
             $("#galery").append(img);
+            downloadImages(imgToDownload);
             $(".img-overlay").click(function() {
                 id = $(this).data("id");
                 idCategory = $(this).data("category");
@@ -128,6 +146,15 @@
             });
         }
 
+        function downloadImages(listImages)
+        {
+            $.each(listImages, function(i, url)
+            {
+                var img = new Image();
+                img.src = url;
+            });
+        }
+
         function showModal(image, category, index)
         {
             var img = "";
@@ -140,11 +167,11 @@
                         + imageC.description + "' data-id='" + imageC.id + "' data-index='" + i + "'/>";
             });
             $("#lightbox-images-category").html(img);
-            
+
             $("#lightbox").fadeIn('slow', function() {
-                
+
                 $("html,body").scrollTop(0);
-            changeImage(category, index, true);
+                changeImage(category, index, true);
             });
 
             $("#lightboxClose").click(function() {
@@ -164,7 +191,7 @@
                         function() {
                             var index = $("#lightbox-img").data("index");
                             changeImage(category, (index + 1))
-                        }, 2500);
+                        }, duration);
                 $("#lightbox-image-stop").removeClass("hide");
                 $("#lightbox-image-play").addClass("hide");
             }
@@ -187,15 +214,15 @@
 
             });
         }
-        
+
         function exitLightbox(positionMainScrollBar)
         {
             $("html,body").scrollTop(positionMainScrollBar);
-                    $("#lightbox").fadeOut('fast', function()
-                    {
-                        $("#lightbox-img").attr("src", '');
-                        $('body').unbind("keyup");
-                    });
+            $("#lightbox").fadeOut('fast', function()
+            {
+                $("#lightbox-img").attr("src", '');
+                $('body').unbind("keyup");
+            });
         }
 
         function getCategoryById(id)
@@ -238,7 +265,7 @@
             else
                 $("#lightbox-image-prev").removeClass("hide");
             console.log(category.images);
-            if ((index +1) === (category.images.length - 1))
+            if ((index + 1) === (category.images.length - 1))
             {
                 $("#lightbox-image-next").addClass("hide");
             }

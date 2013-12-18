@@ -69,7 +69,7 @@
 
         <script type="text/javascript">
             $(document).ready(function() {
-                $(document).galerie();
+                $(document).galerie(true,2500);
 
             });
 

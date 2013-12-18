@@ -123,8 +123,10 @@ body {
     width: calc(100%-240px);
     height: 70%;
     margin: auto;
+    margin-left: 255px;
     -webkit-align-content: center;
     -ms-flex-line-pack: center;
+    -webkit-align-content: center;
     align-content: center;
 }
     .lightbox-image-legend {
