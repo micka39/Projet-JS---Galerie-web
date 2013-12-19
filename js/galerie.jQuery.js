@@ -11,6 +11,8 @@
         //contenu du plugin
 
         var categories = new Array();
+
+        var diaporama;
         var lightbox = '<div id="sidebar"></div><div id="galery"></div><div class="lightbox-wrapper" id="lightbox">'
                 + '<div class="lightbox-images-category" id="lightbox-images-category"></div>'
                 + '<div class="lightbox-nav">'
@@ -89,7 +91,7 @@
             this.name = name;
             this.description = description;
             this.id = id;
-            this.images;
+            this.images = new Array();
         }
 
         function ImageClass(small, medium, large, title, id, description)
@@ -139,13 +141,14 @@
                 idCategory = $(this).data("category");
 
                 var category = getCategoryById(idCategory);
-                console.log(category);
                 var indexImage;
                 var image = $.grep(category.images, function(image, i)
                 {
                     if (image.id === id)
                     {
                         indexImage = i;
+
+                        $("#lightbox-img").attr("src", image.medium);
                         return image;
                     }
                 });
@@ -165,7 +168,6 @@
         function showModal(image, category, index)
         {
             var img = "";
-            var diaporama;
             var positionMainScrollBar = $(document).scrollTop();
             $.each(category.images, function(i, imageC)
             {
@@ -186,7 +188,7 @@
             $("#lightbox").fadeIn('slow', function() {
 
                 $("html,body").scrollTop(0);
-                changeImage(category, index, true);
+                changeImage(category, index);
             });
 
             $("#lightboxClose").click(function() {
@@ -198,7 +200,7 @@
                 $("#lightbox-image-stop").addClass("hide");
                 $("#lightbox-image-play").removeClass("hide");
             });
-            
+
             $(".lightbox-images-category-img").click(function() {
                 var index = $(this).data("index");
                 changeImage(category, index);
@@ -210,7 +212,7 @@
                 diaporama = window.setInterval(
                         function() {
                             var index = $("#lightbox-img").data("index");
-                            changeImage(category, (index + 1))
+                            changeImage(category, (index + 1), true);
                         }, duration);
                 $("#lightbox-image-stop").removeClass("hide");
                 $("#lightbox-image-play").addClass("hide");
@@ -295,12 +297,12 @@
          * @returns {integer|null} Code touche ou null
          */
         function getCharCode(event) {
-            if (event.which == null) {
-                return event.keyCode // IE
-            } else if (event.which != 0 || event.charCode != 0) {
-                return event.which   // the rest
+            if (event.which === null) {
+                return event.keyCode; // IE
+            } else if (event.which !== 0 || event.charCode !== 0) {
+                return event.which;   // the rest
             } else {
-                return null // special key
+                return null; // special key
             }
         }
 
@@ -311,11 +313,14 @@
          * @param {boolean} start Boolean indiquant s'il s'agit du premier lancement
          */
         function changeImage(category, index, inDiaporama) {
-            if(inDiaporama != undefined)
+            // Arrêt du diaporama si on y est plus
+            if (inDiaporama === undefined)
             {
                 clearInterval(diaporama);
+                $("#lightbox-image-stop").addClass("hide");
+                $("#lightbox-image-play").removeClass("hide");
             }
-            
+
             // Permet au diaporama de boucler une fois arrivé à la fin du tableau
             if (index > (category.images.length - 1))
             {

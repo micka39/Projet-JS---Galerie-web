@@ -12,25 +12,33 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     if (!empty($_FILES)) {
         $file = $_FILES['photos'];
         // Vérification du type de fichier
-        switch ($file['type']) {
-            case "image/png":
-                $image->addImage($_POST['category'], $_FILES['photos']['name'], $_FILES['photos']['tmp_name']);
-                break;
-            case "image/jpeg":
-                $image->addImage($_POST['category'], $_FILES['photos']['name'], $_FILES['photos']['tmp_name']);
-                break;
-            case "image/pjpeg":
-                $image->addImage($_POST['category'], $_FILES['photos']['name'], $_FILES['photos']['tmp_name']);
-                break;
-            default: {
-                    $response = array(
-                        "success" => "false",
-                        "message" => $_FILES['photos']['name'] . " - ce fichier n'est pas une image (png/jpeg) !",
-                        "code" => "1"
-                    );
-                }
-                break;
-        }
+        $max_size = ini_get("upload_max_filesize");
+        if ($file['error'] == 1) {
+            $response = array(
+                "success" => "false",
+                "message" => $_FILES['photos']['name'] . " - ce fichier dépasse la taille autorisée par le serveur ($max_size) !",
+                "code" => "1"
+            );
+        } else
+            switch ($file['type']) {
+                case "image/png":
+                    $image->addImage($_POST['category'], $_FILES['photos']['name'], $_FILES['photos']['tmp_name']);
+                    break;
+                case "image/jpeg":
+                    $image->addImage($_POST['category'], $_FILES['photos']['name'], $_FILES['photos']['tmp_name']);
+                    break;
+                case "image/pjpeg":
+                    $image->addImage($_POST['category'], $_FILES['photos']['name'], $_FILES['photos']['tmp_name']);
+                    break;
+                default: {
+                        $response = array(
+                            "success" => "false",
+                            "message" => $_FILES['photos']['name'] . " - ce fichier n'est pas une image (png/jpeg) !",
+                            "code" => "1"
+                        );
+                    }
+                    break;
+            }
         if($response == "")
             $response = array(
                         "success" => "true",
@@ -75,21 +83,25 @@ function showForm() {
             <div class="droparea" id="droparea">
                 <p><img src="img/draganddrop.png" alt="Image représentant un glisser déposer"/> Glissez vos images ici</p>
             </div>
-
+            <div class="hide" id="wait"><img class="center" src="img/wait.png" alt="Envoi en cours" title="Envoi en cours"/>
             <div class="progress progress-striped active">
   <div class="progress-bar" id="progress" style="width: 0%;">
   </div>
-</div>
+</div></div>
+            
             <ul id="results"></ul>
         </form>
     </div>
     <!-- Javascript pour le formulaire d'ajout d'utilisateur. -->
     <script type="text/javascript">
+        // Pour l'avancement de la barre de progression
         var fileInUpload =0;
         $(function () {
+            // Envoi des photos
             $('#photos').fileupload({
                 beforeSend: function(){
                     fileInUpload ++;
+                    $("#wait").removeClass("hide");
                     $("#progress").text("Envoi en cours");
                 },
                 url: 'images/addImage.php',
@@ -100,6 +112,7 @@ function showForm() {
                     $("#results").prepend("<li>"+json1.file+" est bien enregistré !</li>");
                     else
                     $("#results").prepend("<li class='alert alert-danger'>"+json1.message+"</li>");
+                // Pour l'avancement de la barre de progression
                     fileInUpload --;
                     $("#progress").css("width", 100/fileInUpload+ "%");
                     if(fileInUpload == 0)
@@ -108,6 +121,7 @@ function showForm() {
         });
                             
         $(document).ready(function() {
+            // Si le drag and drop n'est pas supporté,on enlève la zone de drop
             if(!('draggable' in document.createElement('span')))
             {
                 $("#droparea").css(

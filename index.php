@@ -1,6 +1,7 @@
 <?php require 'bootstrap.php'; ?>
 <!DOCTYPE html>
-<html>
+<!--[if IE 7 ]><html class="ie7"><![endif]-->
+<!--[if gt IE 8]><!--> <html> <!--<![endif]-->
 
     <head>
         <title>Galerie JS</title>
@@ -11,7 +12,7 @@
     </head>
 
     <body>
-        <h1>Titre !</h1>
+        <h1 class="title">Galerie photos</h1>
 <?php
         $images = new Images();
         $categories = $images->getCategories();
