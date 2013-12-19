@@ -9,9 +9,28 @@
     $.fn.galerie = function(responsive, duration, download, url) {
 
         //contenu du plugin
-        
-        var categories = new Array();
 
+        var categories = new Array();
+        var lightbox = '<div id="sidebar"></div><div id="galery"></div><div class="lightbox-wrapper" id="lightbox">'
+                + '<div class="lightbox-images-category" id="lightbox-images-category"></div>'
+                + '<div class="lightbox-nav">'
+                + '<img src="img/close.png" height="40" width="40" alt="fermer la fenêtre" title="fermer la fenêtre" id="lightboxClose" class="lightbox-nav-close" />'
+                + '<img src="img/download.png" class="hide" height="60" width="60" alt="télécharger l\'image" title="télécharger l\'image" id="lightbox-image-download" />'
+                + '<img src="img/arrow-prev.png" height="60" width="60" alt="image précédente" title="image précédente" id="lightbox-image-prev" />'
+                + '<img src="img/media-player.png" height="60" width="60" alt="lancer le diaporama" title="lancer le diaporama" id="lightbox-image-play" />'
+                + '<img src="img/media-stop.png" class="hide" height="60" width="60" alt="arrêter le diaporama" title="arrêter le diaporama" id="lightbox-image-stop" />'
+                + '<img src="img/arrow-next.png" height="60" width="60" alt="image suivante" title="image suivante" id="lightbox-image-next" />'
+                + '</div><div class="lightbox-image" id="lightbox-image">'
+                + '<img class="lightbox-img" src="" title="" alt="" id="lightbox-img" data-index="0" />'
+                + '</div>'
+                + '<div class="lightbox-image-legend">'
+                + '<h1 id="lightbox-title">Une photo</h1>'
+                + '<hr/>'
+                + '<span id="lightbox-description">'
+                + '</span>'
+                + '</div>'
+                + '</div>';
+        this.append(lightbox);
         var htmlCategories = "<ul>";
         $(".category").each(function(i)
         {
@@ -100,7 +119,7 @@
                 if (imageNumber === 1)
                     img += "<div class='line'>";
                 img += "<div class='img-group'>";
-                img += "<img class='img' src='" + image.small + "' title='" + image.title + "' description='" + image.description + "'/>";
+                img += "<img class='img' src='" + image.small + "' title='" + image.title + "' alt='" + image.description + "'/>";
                 img += "<div class='img-overlay' data-id='" + image.id + "' data-category='" + idCategory + "'></div></div>";
                 if (imageNumber >= 3)
                 {
@@ -112,7 +131,7 @@
                 imgToDownload.push(image.medium);
             });
 
-            $("#galery").html("");
+            $("#galery >.line").remove();
             $("#galery").append(img);
             downloadImages(imgToDownload);
             $(".img-overlay").click(function() {
@@ -179,6 +198,11 @@
                 $("#lightbox-image-stop").addClass("hide");
                 $("#lightbox-image-play").removeClass("hide");
             });
+            
+            $(".lightbox-images-category-img").click(function() {
+                var index = $(this).data("index");
+                changeImage(category, index);
+            });
 
 
             $("#lightbox-image-play").click(function()
@@ -236,6 +260,15 @@
             {
                 $("#lightbox-img").attr("src", '');
                 $('body').unbind("keyup");
+                $("#lightboxClose").unbind("click");
+                $("#lightbox-image-stop").unbind("click");
+                $("#lightbox-image-play").unbind("click");
+                $("#lightbox-image-prev").unbind("click");
+                $("#lightbox-image-next").unbind("click");
+                $(".lightbox-images-category-img").unbind("click");
+                if (download)
+                    $("#lightbox-image-download").unbind("click");
+
             });
         }
 
@@ -277,52 +310,33 @@
          * @param {integer} index L'index de l'image à afficher
          * @param {boolean} start Boolean indiquant s'il s'agit du premier lancement
          */
-        function changeImage(category, index, start) {
-
-            // Gestion de l'affichage des boutons suivant/précédent
-            if (index === 0)
-                $("#lightbox-image-prev").addClass("hide");
-            else
-                $("#lightbox-image-prev").removeClass("hide");
-            console.log(category.images);
-            if ((index + 1) === (category.images.length - 1))
+        function changeImage(category, index, inDiaporama) {
+            if(inDiaporama != undefined)
             {
-                $("#lightbox-image-next").addClass("hide");
+                clearInterval(diaporama);
             }
-            else
-                $("#lightbox-image-next").removeClass("hide");
+            
             // Permet au diaporama de boucler une fois arrivé à la fin du tableau
             if (index > (category.images.length - 1))
             {
                 index = 0;
-                $("#lightbox-image-next").removeClass("hide");
             }
             if (index < 0)
                 index = category.images.length - 1;
 
             // Récupération de l'image
             image = category.images[index];
-            // Au lancement de la lightbox avec création de l'attribut data-index
-            if (start !== undefined)
-            {
+
+            $("#lightbox-image").fadeOut(0, function() {
                 $("#lightbox-img").attr("src", image.medium);
                 $("#lightbox-img").attr("title", image.title);
                 $("#lightbox-img").attr("alt", image.description);
-                $("#lightbox-img").attr("data-index", index);
-            }
-            else
-            {
-                $("#lightbox-image").fadeOut(0, function() {
-                    $("#lightbox-img").attr("src", image.medium);
-                    $("#lightbox-img").attr("title", image.title);
-                    $("#lightbox-img").attr("alt", image.description);
-                    $("#lightbox-img").data("index", index);
-                });
-
-                $("#lightbox-image").fadeIn(700);
+                $("#lightbox-img").data("index", index);
+            });
+            $("#lightbox-image").fadeIn(700);
 
 
-            }
+
             // Définition du titre et de la description
             $("#lightbox-title").text(image.title);
             $("#lightbox-description").text(image.description);

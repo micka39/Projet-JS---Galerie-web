@@ -76,6 +76,9 @@ body {
     margin: 20px 10px 20px 10px;
     -webkit-transition: -webkit-transform 0.3s ease;
     transition: transform 0.5s ease;
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
 }
     .img-group:hover {
     -webkit-transform: rotate(10deg);
