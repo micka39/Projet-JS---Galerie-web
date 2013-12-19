@@ -1,4 +1,7 @@
-<?php $base  = "http://localhost/js/"; ?>
+<?php
+$config = parse_ini_file(__DIR__ ."/class/config.ini");
+
+$base  = $config['base']; ?>
 <!DOCTYPE html>
 <html lang="fr">
     <head>

@@ -28,17 +28,19 @@
                 data-description='" . $category['description'] . "'>";
 
             $listImages = $images->getPhotos($category['id']);
-            if (!is_string($listImages)) {
-                foreach ($listImages as $image) {
-                    echo "<li data-id='" . $image['idimage'] . "' data-large='upload/" . $image['file_name'] . "_l." . $image['extension'] . "'"
-                    . " data-medium='upload/" . $image['file_name'] . "_m." . $image['extension'] . "'"
-                    . " data-small='upload/" . $image['file_name'] . "_s." . $image['extension'] . "'"
-                    . " data-title='" . $image['title'] . "' data-description='" . $image['description'] . "'>"
-                    . "<img src='upload/" . $image['file_name'] . "_s." . $image['extension'] . "'  alt='" . $image['description'] . "' class='img'/>"
-                    . "</li>";
+            if ($listImages != "Il n'y a pas de photos dans cet album") {
+                if (!is_string($listImages)) {
+                    foreach ($listImages as $image) {
+                        echo "<li data-id='" . $image['idimage'] . "' data-large='" . $image['file_name'] . "_l." . $image['extension'] . "'"
+                        . " data-medium='upload/" . $image['file_name'] . "_m." . $image['extension'] . "'"
+                        . " data-small='upload/" . $image['file_name'] . "_s." . $image['extension'] . "'"
+                        . " data-title='" . $image['title'] . "' data-description='" . $image['description'] . "'>"
+                        . "<img src='upload/" . $image['file_name'] . "_s." . $image['extension'] . "'  alt='" . $image['description'] . "' class='img'/>"
+                        . "</li>\n";
+                    }
+                } else {
+                    echo $listImages;
                 }
-            } else {
-                echo $listImages;
             }
             echo "</ul>";
         }
@@ -47,11 +49,12 @@
 
             <div class="lightbox-images-category" id="lightbox-images-category"></div>
             <div class="lightbox-nav">
-                <img src="img/close.png" height="40" width="40" alt="fermer la fenêtre" id="lightboxClose" class="lightbox-nav-close" />
-                <img src="img/arrow-prev.png" height="60" width="60" alt="image précédente" id="lightbox-image-prev" />
-                <img src="img/media-player.png" height="60" width="60" alt="lancer le diaporama" id="lightbox-image-play" />
-                <img src="img/media-stop.png" class="hide" height="60" width="60" alt="arrêter le diaporama" id="lightbox-image-stop" />
-                <img src="img/arrow-next.png" height="60" width="60" alt="image suivante" id="lightbox-image-next" />
+                <img src="img/close.png" height="40" width="40" alt="fermer la fenêtre" title="fermer la fenêtre" id="lightboxClose" class="lightbox-nav-close" />
+                <img src="img/download.png" class="hide" height="60" width="60" alt="télécharger l'image" title="télécharger l'image" id="lightbox-image-download" />
+                <img src="img/arrow-prev.png" height="60" width="60" alt="image précédente" title="image précédente" id="lightbox-image-prev" />
+                <img src="img/media-player.png" height="60" width="60" alt="lancer le diaporama" title="lancer le diaporama" id="lightbox-image-play" />
+                <img src="img/media-stop.png" class="hide" height="60" width="60" alt="arrêter le diaporama" title="arrêter le diaporama" id="lightbox-image-stop" />
+                <img src="img/arrow-next.png" height="60" width="60" alt="image suivante" title="image suivante" id="lightbox-image-next" />
 
             </div>
             <div class="lightbox-image" id="lightbox-image">
@@ -69,11 +72,11 @@
 
         <script type="text/javascript">
             $(document).ready(function() {
-                $(document).galerie(true,2500);
+                $(document).galerie(true, 2500, true, "http://localhost/js/download.php?id=");
 
             });
 
-            
+
         </script>
     </body>
 

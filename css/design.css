@@ -199,6 +199,7 @@ body {
     z-index: 1;
 }
     .lightbox-images-category-img {
+    max-width: 200px;
     margin: 5px;
     padding: 2px;
 }

@@ -6,13 +6,12 @@
      * @param {integer} duration La durée en ms entre chaque slide durant le diaporama
      * @returns {_L1.$.fn} Retourne l'objet
      */
-    $.fn.galerie = function(responsive, duration) {
+    $.fn.galerie = function(responsive, duration, download, url) {
 
         //contenu du plugin
-
+        
         var categories = new Array();
 
-        imageNumber = 1;
         var htmlCategories = "<ul>";
         $(".category").each(function(i)
         {
@@ -66,17 +65,6 @@
             showCategory(category[0]);
         });
 
-        $("#lightbox-image-prev").click(function() {
-            $("#lightbox-image").fadeOut(500, function() {
-                $("#img").attr("src", "upload/52a87ef71b556_m.jpg");
-            });
-
-            $("#lightbox-image").fadeIn(700);
-        });
-
-        $("#lightbox-image-next").click(function() {
-            changeImage();
-        });
         function Category(name, description, id)
         {
             this.name = name;
@@ -167,7 +155,15 @@
                         + imageC.description + "' data-id='" + imageC.id + "' data-index='" + i + "'/>";
             });
             $("#lightbox-images-category").html(img);
-
+            if (download)
+            {
+                $("#lightbox-image-download").removeClass("hide");
+                $("#lightbox-image-download").click(function()
+                {
+                    var index = $("#lightbox-img").data("index");
+                    window.open(url + category.images[index].large);
+                });
+            }
             $("#lightbox").fadeIn('slow', function() {
 
                 $("html,body").scrollTop(0);
@@ -196,6 +192,19 @@
                 $("#lightbox-image-play").addClass("hide");
             }
             );
+
+
+
+            $("#lightbox-image-prev").click(function() {
+                var index = $("#lightbox-img").data("index");
+                changeImage(category, index - 1);
+            });
+
+            $("#lightbox-image-next").click(function() {
+                var index = $("#lightbox-img").data("index");
+                changeImage(category, index + 1);
+            });
+
             $('body').bind('keyup', function(e) {
                 var index = $("#lightbox-img").data("index");
                 var keycode = getCharCode(e);
@@ -215,8 +224,13 @@
             });
         }
 
+        /**
+         * Fonction permettant de quitter la lightbox
+         * @param {integer} positionMainScrollBar La position de la barre de scroll au départ
+         */
         function exitLightbox(positionMainScrollBar)
         {
+            // Positionne la barre de scroll principale
             $("html,body").scrollTop(positionMainScrollBar);
             $("#lightbox").fadeOut('fast', function()
             {
@@ -225,8 +239,14 @@
             });
         }
 
+        /**
+         * Retourne la catégorie en fonction de son id
+         * @param {integer} id Id a rechercher
+         * @returns {Category} Categorie
+         */
         function getCategoryById(id)
         {
+            // Parcours de toutes les catégories jusqu'à trouver la bonne catégorie
             var category = $.grep(categories, function(category, i)
             {
                 if (category.id === id)
@@ -286,12 +306,16 @@
             if (start !== undefined)
             {
                 $("#lightbox-img").attr("src", image.medium);
+                $("#lightbox-img").attr("title", image.title);
+                $("#lightbox-img").attr("alt", image.description);
                 $("#lightbox-img").attr("data-index", index);
             }
             else
             {
                 $("#lightbox-image").fadeOut(0, function() {
                     $("#lightbox-img").attr("src", image.medium);
+                    $("#lightbox-img").attr("title", image.title);
+                    $("#lightbox-img").attr("alt", image.description);
                     $("#lightbox-img").data("index", index);
                 });
 
