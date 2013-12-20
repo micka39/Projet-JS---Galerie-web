@@ -1,18 +1,13 @@
+<?php
+$titre = "Index";
+include_once("header.php"); 
+?>
+      
 
-<?php 
-$titre = "Hello World";
-include_once("header.php"); ?>
-    <!-- Main jumbotron for a primary marketing message or call to action -->
-    <div class="jumbotron">
-      <div class="container">
-        <h1>Galerie web</h1>
-        
-      </div>
-    </div>
-
-    <div class="container">
-      <!-- Example row of columns -->
-      <div class="row">
+      
+      <div id="corp">
+          
+          
           <a href="category.php"><button type="button" class="btn btn-default navbar-btn">Categorie</button></a>
           <label for="typeahead" style="display: block">Rechercher une image:</label>
            <input type="text" class="form-control" id="typeahead" name="typeahead" style="width: 25%; display: inline" data-provide="typeahead" placeholder="Rechercher" autocomplete="off">
@@ -36,9 +31,28 @@ include_once("header.php"); ?>
                 });
             </script>
             
-      </div> 
+
+
+
 
       <hr>
+      
+      </div>
+      </body>
+      
+      <div id="footer">
+      <footer>
+        
+      </footer>
+    
+      </div>
 
+    
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="js/typeahead.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+   
+    
+  </body>
+</html>
 
-<?php include_once("footer.php"); ?>

@@ -1,0 +1,46 @@
+/* 
+    Document   : insex
+    Created on : 13 déc. 2013, 11:04:02
+    Author     : lp
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+root { 
+    display: block;
+}
+
+#menu{
+    
+    float: left;
+    width: 50%;
+   
+}
+
+#corp{
+    
+    float: left;
+    
+    
+}
+
+
+li{
+    list-style: none;
+    display:inline-block;
+}
+
+ul{
+    display: block;
+}
+
+img{
+ border: #adadad outset medium;
+
+}
+
+li a:hover img{
+    
+    border: #269abc inset medium;
+    
+}
