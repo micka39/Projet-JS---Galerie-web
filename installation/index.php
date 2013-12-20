@@ -1,10 +1,7 @@
 <?php
 require '../class/config.php';
 $pdo = connectPdo();
-$sql = "SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
-SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
-SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
-
+$sql = "
 -- -----------------------------------------------------
 -- Table `projetJs`.`user`
 -- -----------------------------------------------------
@@ -17,9 +14,9 @@ CREATE TABLE IF NOT EXISTS `user` (
   `email` VARCHAR(255) NULL,
   PRIMARY KEY (`iduser`))
 ENGINE = InnoDB
-
-
--- -----------------------------------------------------
+";
+$pdo->query($sql);
+$sql = "-- -----------------------------------------------------
 -- Table `projetJs`.`category`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `category` (
@@ -29,9 +26,9 @@ CREATE TABLE IF NOT EXISTS `category` (
   `time` TIMESTAMP NULL,
   PRIMARY KEY (`idcategory`))
 ENGINE = InnoDB
-
-
--- -----------------------------------------------------
+";
+$pdo->query($sql);
+$sql ="-- -----------------------------------------------------
 -- Table `projetJs`.`image`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `image` (
@@ -42,8 +39,8 @@ CREATE TABLE IF NOT EXISTS `image` (
   `extension` VARCHAR(5) NULL,
   PRIMARY KEY (`idimage`))
 ENGINE = InnoDB
-
--- -----------------------------------------------------
+";$pdo->query($sql);
+$sql = "-- -----------------------------------------------------
 -- Table `projetJs`.`imagecategory`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `imagecategory` (
@@ -64,10 +61,6 @@ CREATE TABLE IF NOT EXISTS `imagecategory` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
 
-
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 ";
 $pdo->query($sql);
 $pdo->query("INSERT INTO `user` (`username`, `password`, `level_access`, `email`) VALUES ('admin', 'jsiVSyV2S6NZw', 0, 'mickael.puyfages@univ-lyon1.fr');

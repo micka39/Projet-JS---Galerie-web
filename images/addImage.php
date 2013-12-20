@@ -6,8 +6,10 @@ require_once '../bootstrap.php';
  * en base de données d'un nouvel utilisateur
  */
 // Vérification de l'existence du champs de formulaire fullname 
+
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $response = "";
+    
     $image = new Images();
     if (!empty($_FILES)) {
         $file = $_FILES['photos'];
@@ -69,12 +71,20 @@ function showForm() {
             <div class="form-group col-xs-12">
                 <label for="category" class="control-label">Catégorie (vous pouvez en sélectionner plusieurs)</label>
                 <select name="category[]" id="category" class="form-control" multiple >
-                    <option value="1" selected>Non catégorisé</option>
-                    <option value="2">Divers</option>
-                    <option value="3">Nature</option>
+                    <?php
+                    
+    $image = new Images();
+    $categories = $image->getCategories();
+    foreach ($categories as $category) {
+        if($category['id'] == 1)
+        echo "<option value='".$category['id']."' selected>".$category['name']."</option>";
+        else
+            echo "<option value='".$category['id']."'>".$category['name']."</option>";
+    }
+                    ?>
                 </select>
             </div>
-
+            <p>Les titres et description de chaque image sont définis par défaut. Vous pouvez les modifier ensuite</p>
             <p>Formats acceptés: JPG, PNG</p>
             <div class="form-group col-xs-12">
                 <label for="photos" class="control-label">Image</label>
@@ -116,7 +126,11 @@ function showForm() {
                     fileInUpload --;
                     $("#progress").css("width", 100/fileInUpload+ "%");
                     if(fileInUpload == 0)
+                    {
                         $("#progress").text("Terminé !")
+                        
+                    $("#wait").addClass("hide");
+                    }
                 }});
         });
                             

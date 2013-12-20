@@ -13,7 +13,9 @@
 
     <body>
         <h1 class="title">Galerie photos</h1>
-<?php
+
+        <div id="plugin-galerie">
+            <?php
         $images = new Images();
         $categories = $images->getCategories();
         foreach ($categories as $category) {
@@ -40,7 +42,7 @@
             echo "</ul>";
         }
         ?>
-        <div id="plugin-galerie"></div>
+        </div>
         
 
 

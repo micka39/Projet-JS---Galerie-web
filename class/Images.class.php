@@ -2,10 +2,6 @@
 
 class Images {
 
-    private $_image_tb_name = "images";
-    private $_image_com_tb_name = "images";
-    private $_images_par_page = 20;
-    private $_albums_par_page = 20;
     private $db;
 
     public function __construct() {
@@ -21,25 +17,16 @@ class Images {
         return $results;
     }
 
-    public function getPhotos($album_id, $limite_bas = null) {
+    public function getPhotos($album_id) {
         $result = $this->db->query("SELECT COUNT(*) as nb_photos FROM imagecategory WHERE category_idcategory=" . $album_id);
         $results = $result->fetch();
         if ($results['nb_photos'] > 0) {
-            if ($limite_bas == NULL)
-                $sql = "SELECT i.extension,i.file_name,i.idimage,i.title,i.description FROM
+            $sql = "SELECT i.extension,i.file_name,i.idimage,i.title,i.description FROM
                     imagecategory as ic
                     JOIN image as i ON i.idimage = ic.image_idimage
-                    WHERE category_idcategory =" . $album_id."
-                    ORDER BY i.idimage LIMIT 0,100 ";
-            else {
-                $limite_haut = $limite_bas + $_images_par_page;
-                $sql = "SELECT i.extension,i.file_name,i.idimage,i.title,i.description FROM
-                    imagecategory as ic
-                    JOIN image as i ON i.idimage = ic.image_idimage
-                    WHERE category_idcategory =" . $album_id."
-                    ORDER BY i.idimage 
-                    LIMIT " . $limite_bas . "," . $limite_haut;
-            }
+                    WHERE category_idcategory =" . $album_id . "
+                    ORDER BY i.idimage ";
+
             $result = $this->db->query($sql);
             $results = $result->fetchAll();
             return $results;
@@ -48,6 +35,10 @@ class Images {
         }
     }
 
+    /**
+     * Retourne toutes les catégories
+     * @return type Retourne toutes les catégories
+     */
     public function getCategories() {
         $sql = "SELECT idcategory as id, name,description FROM category";
         $result = $this->db->query($sql);
@@ -55,15 +46,32 @@ class Images {
         return $results;
     }
 
+    /**
+     * Retourne les catégories d'une image
+     * @param type $id Id de l'image
+     * @return type Tableau contenant les catégories de l'image
+     */
+    public function getCategoriesById($id) {
+        $sql = "SELECT category_idcategory as id FROM imagecategory WHERE image_idimage = ".$id;
+        $result = $this->db->query($sql);
+        $result->setFetchMode(PDO::FETCH_BOTH);
+        $results = $result->fetchAll();
+        return $results;
+    }
+
     public function addImage($id_categories, $nom_fichier, $nom_fichier_temp) {
+        // Token pour le nom du fichier
         $token_file_name = uniqid();
+        // Répertoire de stockage
         $path_album = __DIR__ . '../../upload/';
         $path_image_dest = $path_album . $token_file_name;
+        // Récupération de l'extension
         $tab = explode(".", $nom_fichier);
-
+        // Création des différentes tailles d'image
         $this->imagethumb($nom_fichier_temp, $path_album . $token_file_name . "_s." . $tab['1'], 200);
         $this->imagethumb($nom_fichier_temp, $path_album . $token_file_name . "_m." . $tab['1'], 1024);
         $this->imagethumb($nom_fichier_temp, $path_album . $token_file_name . "_l." . $tab['1'], 2048);
+
         $sql = "INSERT INTO image (
               title
               ,description
@@ -98,35 +106,44 @@ class Images {
         }
     }
 
+    /**
+     * Fonction de suppression d'une image
+     * @param type $id Id de l'image
+     * @return string Message d'erreur
+     */
     function deleteImage($id) {
+        // Récupération d'une image
         $photo = $this->getPhoto($id);
         $dir = __DIR__ . '../../upload/';
         $message = "";
+        // Suppression de la miniature
         if (file_exists($dir . $photo['file_name'] . "_s." . $photo['extension'])) {
             if (is_file($dir . $photo['file_name'] . "_s." . $photo['extension'])) {
                 unlink($dir . $photo['file_name'] . "_s." . $photo['extension']);
             } else
                 $message += "L'image de taille miniature n'existait pas";
         }
+        // Suppression de la taille moyenne
         if (file_exists($dir . $photo['file_name'] . "_m." . $photo['extension'])) {
             if (is_file($dir . $photo['file_name'] . "_m." . $photo['extension'])) {
                 unlink($dir . $photo['file_name'] . "_m." . $photo['extension']);
             } else
                 $message += "L'image de taille moyenne n'existait pas";
         }
+        // Suppression de la taille large
         if (file_exists($dir . $photo['file_name'] . "_l." . $photo['extension'])) {
             if (is_file($dir . $photo['file_name'] . "_l." . $photo['extension'])) {
                 unlink($dir . $photo['file_name'] . "_l." . $photo['extension']);
             } else
                 $message += "L'image de taille large n'existait pas";
         }
-
+        // Suppression en base de données des associations aux catégories
         $sql = "DELETE FROM imagecategory WHERE image_idimage= :id";
         $requete = $this->db->prepare($sql);
         $requete->execute(array(
             "id" => $id
         ));
-
+        // Suppression en base de données de l'image
         $sql = "DELETE FROM image WHERE idimage= :id";
         $requete = $this->db->prepare($sql);
         $requete->execute(array(
@@ -135,7 +152,13 @@ class Images {
         return $message;
     }
 
-    function updatePhoto($title, $description, $id) {
+    /**
+     * Mise à jour d'une photo
+     * @param type $title Titre
+     * @param type $description Description
+     * @param type $id Id de l'image
+     */
+    function updatePhoto($title, $description, $id,$id_categories) {
 
 
         $sql = "UPDATE image SET
@@ -148,6 +171,26 @@ class Images {
             "description" => $description,
             "id" => $id
         ));
+        // Suppression des catégories existante
+        $sql = "DELETE FROM imagecategory WHERE image_idimage= :id";
+        $requete = $this->db->prepare($sql);
+        $requete->execute(array(
+            "id" => $id
+        ));
+        // Ajout dans les nouvelles catégories
+        $sql = "INSERT INTO imagecategory (
+               category_idcategory
+              ,image_idimage
+            ) VALUES (
+               :category , -- id category
+               :image -- id image
+            )";
+        $sql = $this->db->prepare($sql);
+        foreach ($id_categories as $category) {
+            $sql->execute(array(
+                "category" => $category,
+                "image" => $id));
+        }
     }
 
     /**

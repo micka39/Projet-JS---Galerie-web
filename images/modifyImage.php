@@ -4,7 +4,7 @@ $images = new Images();
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     if (is_numeric($_POST['id'])) {
         $message = "";
-        switch ($_POST['action']) {
+        switch ($_GET['action']) {
             case "delete": {
                     $message = $images->deleteImage($_POST['id']);
                     if ($message == "")
@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                 }
                 break;
             case "modify": {
-                    $message = $images->updatePhoto($_POST['title'], $_POST['description'], $_POST['id']);
+                    $message = $images->updatePhoto($_POST['title'], $_POST['description'], $_POST['id'],$_POST['category']);
                     if ($message == "")
                         echo "L'image a bien été modifiée";
                 }
@@ -23,8 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         }
         if ($message != "") {
             $image = $images->getPhoto($_GET['id']);
-
-            showForm($image['idimage'], $image['title'], $image['description'], $image['file_name'], $image['extension']);
+            $categories = $images->getCategoriesById($_GET['id']);
+            showForm($image['idimage'], $image['title'], $image['description'], $image['file_name'], $image['extension'],$categories);
         }
     } else {
         header("HTTP/1.0 403 Forbidden");
@@ -33,15 +33,15 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 } else {
     if (is_numeric($_GET['id'])) {
         $image = $images->getPhoto($_GET['id']);
-
-        showForm($image['idimage'], $image['title'], $image['description'], $image['file_name'], $image['extension']);
+        $categories = $images->getCategoriesById($_GET['id']);
+        showForm($image['idimage'], $image['title'], $image['description'], $image['file_name'], $image['extension'], $categories);
     } else {
         header("HTTP/1.0 403 Forbidden");
         echo "Cette page n'existe pas ou vous n'en avez pas les autorisations d'accès";
     }
 }
 
-function showForm($id = "", $title = "", $description = "", $file_name = "", $extension = "", $message = "") {
+function showForm($id = "", $title = "", $description = "", $file_name = "", $extension = "", $categories = "", $message = "") {
 
     echo "<div class='alert alert-danger' id='infoFormValidation'>$message</div>";
     ?>
@@ -51,8 +51,29 @@ function showForm($id = "", $title = "", $description = "", $file_name = "", $ex
         </div>
 
         <form action="#" method="POST" class="form-horizontal" id="formModifyImage">
-            <p>Tous les champs sont obligatoires</p>
+            
+            <?php 
+            $idsCategory = array();
+                foreach ($categories as $category) {
+                    $idsCategory[$category['id']]= $category['id'];
+                }
+            ?>
             <input type="hidden" name="id" id="id" value="<?php echo $id; ?>"/>
+            <div class="form-group col-xs-12">
+                <label for="category" class="control-label">Catégorie (vous pouvez en sélectionner plusieurs)</label>
+                <select name="category[]" id="category" class="form-control" multiple >
+                    <?php
+                    $image = new Images();
+                    $categories = $image->getCategories();
+                    foreach ($categories as $category) {
+                        if ($category['id'] == array_key_exists($category['id'], $idsCategory))
+                            echo "<option value='" . $category['id'] . "' selected>" . $category['name'] . "</option>";
+                        else
+                            echo "<option value='" . $category['id'] . "'>" . $category['name'] . "</option>";
+                    }
+                    ?>
+                </select>
+            </div>
             <div class="form-group col-xs-12">
                 <label for="title" class="control-label">Titre</label>
                 <input type="title" name="title" id="title" class="form-control" value="<?php echo $title; ?>"/>
@@ -75,11 +96,11 @@ function showForm($id = "", $title = "", $description = "", $file_name = "", $ex
             });
 
             $("#delete").click(function() {
-                var data = "action=delete&id="
+                var data = "id="
                         + $("#id").val();
                 $.ajax({
                     type: "POST",
-                    url: "images/modifyImage.php",
+                    url: "images/modifyImage.php?action=delete",
                     data: data,
                     success: function(result) {
                         $("#modalBody").html(result);
@@ -90,13 +111,10 @@ function showForm($id = "", $title = "", $description = "", $file_name = "", $ex
             });
 
             $("#modify").click(function() {
-                var data = "action=modify&title="
-                        + $("#title").val()
-                        + "&description=" + $("#description").val()
-                        + "&id=" + $("#id").val();
+                var data = $('#formModifyImage').serialize();
                 $.ajax({
                     type: "POST",
-                    url: "images/modifyImage.php",
+                    url: "images/modifyImage.php?action=modify",
                     data: data,
                     success: function(result) {
                         $("#modalBody").html(result);
@@ -107,36 +125,6 @@ function showForm($id = "", $title = "", $description = "", $file_name = "", $ex
             });
             if ($("#infoFormValidation").text() === "")
                 $("#infoFormValidation").hide();
-            $("#formModifyImage").submit(function(event) {
-                // On bloque la soumission par défaut du formulaire
-                event.preventDefault();
-                var message = verifyFormUserAdd($("#username").val(), $("#email").val(), $("#password").val(), $("#passwordConfirm").val(), true);
-                if (message !== "")
-                {
-                    $("#infoFormValidation").show(200);
-                    $("#infoFormValidation").html(message);
-                }
-                else
-                {
-                    $("#infoFormValidation").html("");
-                    var data = "email="
-                            + $("#email").val()
-                            + "&password=" + $("#password").val()
-                            + "&passwordConfirm=" + $("#passwordConfirm").val()
-                            + "&admin=" + $("#admin").val()
-                            + "&id=" + $("#id").val();
-                    $.ajax({
-                        type: "POST",
-                        url: "utilisateurs/modifyUser.php",
-                        data: data,
-                        success: function(result) {
-                            $("#modalBody").html(result);
-                            $("#modal").modal('show');
-                        }
-
-                    });
-                }
-            });
         });
     </script>
     <?php
