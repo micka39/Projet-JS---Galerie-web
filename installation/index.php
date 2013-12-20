@@ -66,3 +66,4 @@ $pdo->query($sql);
 $pdo->query("INSERT INTO `user` (`username`, `password`, `level_access`, `email`) VALUES ('admin', 'jsiVSyV2S6NZw', 0, 'mickael.puyfages@univ-lyon1.fr');
 ");
 $pdo->query("INSERT INTO `category` (`name`, `description`) VALUES ('Non catégorisé', 'Catégorie par défaut');");
+header('Location: ../category/index.php'); 

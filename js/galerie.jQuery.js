@@ -34,6 +34,7 @@
                 + '</div>';
         this.append(lightbox);
         var htmlCategories = "<ul>";
+        // Analyse du html pour en retrouver les catégories et images
         $(".category").each(function(i)
         {
             var category = new Category(
@@ -72,9 +73,11 @@
         );
 
         htmlCategories += "</ul>";
+        // Affichage des catégories dans la sidebar
         $("#sidebar").append(htmlCategories);
+        // Affichage des images
         showImages(categories[0].images, categories[0].id);
-
+        // Au clic sur une catégorie on change les images
         $(".category").click(function()
         {
             id = $(this).data("id");
@@ -85,7 +88,7 @@
             });
             showCategory(category[0]);
         });
-
+        // Class pour une catégorie
         function Category(name, description, id)
         {
             this.name = name;
@@ -94,6 +97,7 @@
             this.images = new Array();
         }
 
+        // Class d'image
         function ImageClass(small, medium, large, title, id, description)
         {
             this.small = small;
@@ -104,6 +108,10 @@
             this.description = description;
         }
 
+        /**
+         * Affichage d'une catégorie
+         * @param {type} category catégorie
+         */
         function showCategory(category)
         {
             showImages(category.images, category.id);
@@ -116,6 +124,7 @@
             var imgToDownload = new Array();
             var img = "";
             var imageNumber = 1;
+            // Préparation du html à afficher pour les images
             $.each(images, function(i, image)
             {
                 if (imageNumber === 1)
@@ -132,30 +141,37 @@
                     imageNumber++;
                 imgToDownload.push(image.medium);
             });
-
+            // Suppression des images existantes
             $("#galery >.line").remove();
+            // Affichage de la galerie d'images
             $("#galery").append(img);
+            // Préchargement des images
             downloadImages(imgToDownload);
+            // Au clic sur une image
             $(".img-overlay").click(function() {
                 id = $(this).data("id");
-                idCategory = $(this).data("category");
 
+                // Récupération de la catégorie à afficher
+                idCategory = $(this).data("category");
                 var category = getCategoryById(idCategory);
                 var indexImage;
+                // Recherche de l'image cliquée
                 var image = $.grep(category.images, function(image, i)
                 {
                     if (image.id === id)
                     {
                         indexImage = i;
-
-                        $("#lightbox-img").attr("src", image.medium);
                         return image;
                     }
                 });
+                // Affichage de la lightbox
                 showModal(image[0], category, indexImage);
             });
         }
-
+        /**
+         * Préchargement des images
+         * @param {type} listImages liste d'images
+         */
         function downloadImages(listImages)
         {
             $.each(listImages, function(i, url)
@@ -168,14 +184,18 @@
         function showModal(image, category, index)
         {
             var img = "";
+            // Position de la scrollbar pour la remettre à sa position initiale à la fin
             var positionMainScrollBar = $(document).scrollTop();
+            // Affichage des images dans les catégories
             $.each(category.images, function(i, imageC)
             {
                 img += "<img class='lightbox-images-category-img' src='"
                         + imageC.small + "' title='" + imageC.title + "' description='"
                         + imageC.description + "' data-id='" + imageC.id + "' data-index='" + i + "'/>";
             });
+            // Affichage des catégories
             $("#lightbox-images-category").html(img);
+            // Si le téléchargement est autorisé
             if (download)
             {
                 $("#lightbox-image-download").removeClass("hide");
@@ -185,30 +205,35 @@
                     window.open(url + category.images[index].large);
                 });
             }
+            // Affichage de la lightbox en fadeIn
+            
+            //$("#lightbox-img").attr("src", image.medium);
             $("#lightbox").fadeIn('slow', function() {
-
+                // Barre de scroll à 0 pour éviter des bugs
                 $("html,body").scrollTop(0);
                 changeImage(category, index);
             });
-
+            // Abonnement à l'évenement click 
             $("#lightboxClose").click(function() {
                 exitLightbox(positionMainScrollBar);
             });
+            // Abonnement à l'évenement click 
             $("#lightbox-image-stop").click(function() {
                 clearInterval(diaporama);
 
                 $("#lightbox-image-stop").addClass("hide");
                 $("#lightbox-image-play").removeClass("hide");
             });
-
+            // Abonnement à l'évenement click 
             $(".lightbox-images-category-img").click(function() {
                 var index = $(this).data("index");
                 changeImage(category, index);
             });
 
-
+            // Abonnement à l'évenement click 
             $("#lightbox-image-play").click(function()
             {
+                // Pour le défilement des diapositives
                 diaporama = window.setInterval(
                         function() {
                             var index = $("#lightbox-img").data("index");
@@ -220,17 +245,17 @@
             );
 
 
-
+            // Abonnement à l'évenement click 
             $("#lightbox-image-prev").click(function() {
                 var index = $("#lightbox-img").data("index");
                 changeImage(category, index - 1);
             });
-
+            // Abonnement à l'évenement click 
             $("#lightbox-image-next").click(function() {
                 var index = $("#lightbox-img").data("index");
                 changeImage(category, index + 1);
             });
-
+            // Abonnement à l'évenement keyup pour la navigation au clavier
             $('body').bind('keyup', function(e) {
                 var index = $("#lightbox-img").data("index");
                 var keycode = getCharCode(e);

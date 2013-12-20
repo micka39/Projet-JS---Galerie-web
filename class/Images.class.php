@@ -9,6 +9,11 @@ class Images {
         $this->db = connectPdo();
     }
 
+    /**
+     * Retourne une photo
+     * @param type $photo_id l'id de la photo
+     * @return type Retourne une photo
+     */
     public function getPhoto($photo_id) {
         $sql = "SELECT i.* FROM image as i WHERE idimage =" . $photo_id;
         $result = $this->db->query($sql);
@@ -17,6 +22,11 @@ class Images {
         return $results;
     }
 
+    /**
+     * Retourne la liste des photos d'une catégorie
+     * @param type $album_id la catégorie
+     * @return string liste de photos
+     */
     public function getPhotos($album_id) {
         $result = $this->db->query("SELECT COUNT(*) as nb_photos FROM imagecategory WHERE category_idcategory=" . $album_id);
         $results = $result->fetch();
@@ -40,10 +50,16 @@ class Images {
      * @return type Retourne toutes les catégories
      */
     public function getCategories() {
+
         $sql = "SELECT idcategory as id, name,description FROM category";
         $result = $this->db->query($sql);
-        $results = $result->fetchAll();
-        return $results;
+        if ($result === FALSE)
+            return null;
+        else {
+            $results = $result->fetchAll();
+            return $results;
+        }
+        return null;
     }
 
     /**
@@ -108,8 +124,7 @@ class Images {
 
     function deleteCategory($id) {
         $images = $this->getPhotos($id);
-        
-                var_dump($this->db->errorCode());
+
         foreach ($images as $image) {
             $photo = $this->getCategoriesById($image['idimage']);
 
@@ -118,17 +133,16 @@ class Images {
             }
         }
         // Suppression en base de données des associations aux catégories
-                $sql = "DELETE FROM imagecategory WHERE category_idcategory= :id";
-                $requete = $this->db->prepare($sql);
-                $requete->execute(array(
-                    "id" => $id
-                ));
-                var_dump($this->db->errorCode());
-                $sql = "DELETE from category WHERE idcategory = :id";
-                $requete = $this->db->prepare($sql);
-                $requete->execute(array(
-                    "id" => $id
-                ));
+        $sql = "DELETE FROM imagecategory WHERE category_idcategory= :id";
+        $requete = $this->db->prepare($sql);
+        $requete->execute(array(
+            "id" => $id
+        ));
+        $sql = "DELETE from category WHERE idcategory = :id";
+        $requete = $this->db->prepare($sql);
+        $requete->execute(array(
+            "id" => $id
+        ));
     }
 
     /**

@@ -3,7 +3,6 @@
 $extension;
 $file = $_GET['id'];
 $tab = explode(".", $file);
-echo "upload/".$file;
 if(is_file("upload/".$file))
 {
 switch ($tab[1]) {

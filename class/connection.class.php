@@ -78,6 +78,14 @@ class Connection {
         $this->db->exec($sql);
     }
 
+    /**
+     * Ajout d'un utilisateur
+     * @param type $username
+     * @param type $password
+     * @param type $level_access
+     * @param type $email
+     * @return boolean true si tout s'est bien passé. False sinon
+     */
     public function addUser($username, $password, $level_access, $email) {
         $requete = $this->db->prepare('INSERT INTO user
 (username, password, level_access, email) 
@@ -94,6 +102,14 @@ VALUES (:username, :password, :level_access, :email )');
         }
     }
 
+    /**
+     * Modification d'un utilisateur
+     * @param type $id
+     * @param type $email
+     * @param type $level_access
+     * @param type $password
+     * @return boolean true si tout s'est bien passé. False sinon
+     */
     public function modifyUser($id, $email, $level_access, $password = null) {
 
         $requete = NULL;
@@ -123,6 +139,11 @@ VALUES (:username, :password, :level_access, :email )');
         }
     }
 
+    /**
+     * Suppression d'un utilisateur
+     * @param type $id
+     * @return boolean true si tout s'est bien passé. False sinon
+     */
     public function deleteUser($id) {
         $requete = $this->db->prepare('DELETE FROM user
 WHERE iduser = :id');
@@ -134,6 +155,10 @@ WHERE iduser = :id');
         }
     }
 
+    /**
+     * Retourne une liste d'utilisateur
+     * @return type une liste d'utilisateur
+     */
     public function getListUsers() {
         require_once(__DIR__ . '/config.php');
         $this->db = connectPdo();
@@ -144,6 +169,11 @@ WHERE iduser = :id');
         return $rows;
     }
 
+    /**
+     * Retourne un utilisateur
+     * @param type $id
+     * @return type un utilisateur
+     */
     public function getUser($id) {
         require_once(__DIR__ . '/config.php');
         $this->db = connectPdo();
