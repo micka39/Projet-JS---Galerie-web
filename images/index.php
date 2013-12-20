@@ -4,8 +4,11 @@ $titre = "Gestion des images";
 require_once '../bootstrap.php';
 require '../header.php';
 $images = new Images();
-$listImages = $images->getPhotos("1");
-?>
+if (is_numeric($_GET['id'])) {
+
+    $listImages = $images->getPhotos($_GET['id']);
+    ?>
+
 <div class="jumbotron">
     <div class="container">
         <h1>Gestion des images</h1>
@@ -20,27 +23,25 @@ $listImages = $images->getPhotos("1");
         if (!is_string($listImages)) {
             $i = 1;
             foreach ($listImages as $image) {
-                if($i == 1)
+                if ($i == 1)
                     echo "<div class='line'>";
                 echo "<div class='img-group'>"
                 . "<img src='upload/" . $image['file_name'] . "_s." . $image['extension'] . "'  alt='abd' class='img'/>"
-                        . "<div class='img-overlay' data-id='" . $image['idimage'] . "'></div>"
-                        . "</div>";
+                . "<div class='img-overlay' data-id='" . $image['idimage'] . "'></div>"
+                . "</div>";
                 // Trois images par ligne
-                if($i == 3)
-                {
-                  echo "</div>";
-                  $i=1;
-                }
-                else
-                $i++;
+                if ($i == 3) {
+                    echo "</div>";
+                    $i = 1;
+                } else
+                    $i++;
             }
         } else {
             echo $listImages;
         }
         ?>
     </div>
-
+    <a href="category/">Retour à la liste des catégories</a>
 </div>
 
 <!-- Début de la fenêtre modale -->
@@ -60,7 +61,7 @@ $listImages = $images->getPhotos("1");
 <script type="text/javascript">
     $(document).ready(function() {
         $("#addImage").click(function() {
-            showModal("Ajout d'image(s)", "images/addImage.php");
+            showModal("Ajout d'image(s)", "images/addImage.php?id=<?php echo $_GET['id'];?>");
         });
         $(".img-overlay").click(function() {
             showModal("Modification d'image", "images/modifyImage.php?id=" + $(this).data("id"));
@@ -91,4 +92,10 @@ $listImages = $images->getPhotos("1");
 
 <?php
 require '../footer.php';
+
+} else {
+    header("HTTP/1.0 403 Forbidden");
+    echo "Cette page n'existe pas ou vous n'en avez pas les autorisations d'accès";
+}
+?>
 

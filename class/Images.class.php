@@ -52,7 +52,7 @@ class Images {
      * @return type Tableau contenant les catégories de l'image
      */
     public function getCategoriesById($id) {
-        $sql = "SELECT category_idcategory as id FROM imagecategory WHERE image_idimage = ".$id;
+        $sql = "SELECT category_idcategory as id FROM imagecategory WHERE image_idimage = " . $id;
         $result = $this->db->query($sql);
         $result->setFetchMode(PDO::FETCH_BOTH);
         $results = $result->fetchAll();
@@ -104,6 +104,31 @@ class Images {
                 "category" => $category,
                 "image" => $id_photo));
         }
+    }
+
+    function deleteCategory($id) {
+        $images = $this->getPhotos($id);
+        
+                var_dump($this->db->errorCode());
+        foreach ($images as $image) {
+            $photo = $this->getCategoriesById($image['idimage']);
+
+            if (count($photo) === 1) {
+                $this->deleteImage($image['idimage']);
+            }
+        }
+        // Suppression en base de données des associations aux catégories
+                $sql = "DELETE FROM imagecategory WHERE category_idcategory= :id";
+                $requete = $this->db->prepare($sql);
+                $requete->execute(array(
+                    "id" => $id
+                ));
+                var_dump($this->db->errorCode());
+                $sql = "DELETE from category WHERE idcategory = :id";
+                $requete = $this->db->prepare($sql);
+                $requete->execute(array(
+                    "id" => $id
+                ));
     }
 
     /**
@@ -158,7 +183,7 @@ class Images {
      * @param type $description Description
      * @param type $id Id de l'image
      */
-    function updatePhoto($title, $description, $id,$id_categories) {
+    function updatePhoto($title, $description, $id, $id_categories) {
 
 
         $sql = "UPDATE image SET

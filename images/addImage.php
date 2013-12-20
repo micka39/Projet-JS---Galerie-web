@@ -76,7 +76,7 @@ function showForm() {
     $image = new Images();
     $categories = $image->getCategories();
     foreach ($categories as $category) {
-        if($category['id'] == 1)
+        if($category['id'] == $_GET['id'])
         echo "<option value='".$category['id']."' selected>".$category['name']."</option>";
         else
             echo "<option value='".$category['id']."'>".$category['name']."</option>";

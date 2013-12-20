@@ -1,5 +1,6 @@
 <?php 
-include_once("../header.php"); 
+require ("../bootstrap.php");
+
 require ("../class/config.php");
 
 $name=$_POST["name"];
@@ -9,8 +10,7 @@ $connect=connectPdo();
 $req = ("INSERT INTO category(`idcategory`, `name`, `description`, `time`) VALUES(NULL, '".$name."', '".$description."' ,'".date("Y-m-d H:i:s")."')");
 $connect->query($req);
 
-header('Location: category.php'); 
+header('Location: index.php'); 
           
-include_once("../footer.php"); 
 
  ?>
